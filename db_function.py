@@ -43,6 +43,7 @@ def create_structure(engine):
     :return: None\n
     """
 
+    print('Creating structure')
     m.Base.metadata.create_all(engine)
 
 
@@ -53,4 +54,5 @@ def delete_structure(engine):
     :return: None\n
     """
 
+    print('Deleting structure')
     m.Base.metadata.drop_all(engine)
