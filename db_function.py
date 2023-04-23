@@ -49,7 +49,7 @@ def create_structure(engine):
 
 def delete_structure(engine):
     """
-    Function deletes all current structure alongwith the data\n
+    Function deletes all current structure along with the data\n
     :param engine: SQLAlchemy engine\n
     :return: None\n
     """
@@ -63,27 +63,29 @@ def upload_vk_record(session_1, new_record: dict, new_images: dict) -> bool:
     Function uploads record to the database\n
     :param session_1: sessionmaker object
     :param new_record:
-    dictionary{vk_user_id:str, first_name:str,last_name:str,city:str,sex:bool,birth_date:date,url:str,owner_id:int}
+    dictionary{vk_user_id:str, first_name:str,last_name:str,city:str,sex:bool,birth_date:date,url:str}
     :param new_images:
     dictionary{vk_user_id:str, images:list[url:str,likes:int]}
     :return: boolean - True if record was uploaded, False if not
     """
-    my_record = m.VK_Users(
-        vk_user_id=new_record["vk_user_id"],
-        first_name=new_record["first_name"],
-        last_name=new_record["last_name"],
-        city=new_record["city"],
-        sex=new_record["sex"],
-        birth_date=new_record["birth_date"],
-        url=new_record["url"],
-        vk_owner_id=new_record["vk_owner_id"],
-    )
-    session_1.add(my_record)
-    for image in new_images["images"]:
-        my_record = m.Photos(
-            vk_user_id=new_images["vk_user_id"], url=image[0], likes=image[1]
+    with session_1 as db:
+        my_record = m.VKUser(
+            vk_user_id=new_record["vk_user_id"],
+            first_name=new_record["first_name"],
+            last_name=new_record["last_name"],
+            city=new_record["city"],
+            sex=new_record["sex"],
+            birth_date=new_record["birth_date"],
+            url=new_record["url"]
         )
-        session_1.add(my_record)
+        db.add(my_record)
+        db.commit()
+        for image in new_images["images"]:
+            my_record = m.Photo(
+                vk_user_id=new_images["vk_user_id"], url=image[0], likes=image[1]
+            )
+            db.add(my_record)
+            db.commit()
 
 
 def upload_owner_record(session_1, new_record: dict) -> bool:
@@ -94,9 +96,10 @@ def upload_owner_record(session_1, new_record: dict) -> bool:
     dictionary{user_id:str}
     :return: boolean - True if record was uploaded, False if not
     """
-    my_record = m.VK_Users(vk_owner_id=new_record["vk_owner_id"])
-    session_1.add(my_record)
-
+    with session_1 as db:
+        my_record = m.Owner(vk_owner_id=new_record["vk_owner_id"])
+        db.add(my_record)
+        db.commit()
 
 def upload_favourite_record(session_1, new_record: dict) -> bool:
     """
@@ -105,10 +108,12 @@ def upload_favourite_record(session_1, new_record: dict) -> bool:
     dictionary{vk_user_id: str, owner_id:int}
     :return: boolean - True if record was uploaded, False if not
     """
-    my_record = m.Favourites(
-        vk_user_id=new_record["vk_user_id"], vk_owner_id=new_record["vk_owner_id"]
-    )
-    session_1.add(my_record)
+    with session_1 as db:
+        my_record = m.Favourite(
+            vk_user_id=new_record["vk_user_id"], vk_owner_id=new_record["vk_owner_id"]
+        )
+        db.add(my_record)
+        db.commit()
 
 
 def is_exists(session_2, table_, column_: str, value_: str) -> bool:

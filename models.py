@@ -4,7 +4,14 @@ from sqlalchemy.orm import declarative_base, relationship
 Base = declarative_base()
 
 
-class VK_Users(Base):
+class Owner(Base):
+    __tablename__ = "owners"
+    id = sq.Column(sq.Integer, autoincrement=True, primary_key=True)
+    vk_owner_id = sq.Column(sq.String(20), nullable=False)
+    favourites = relationship("Favourite", back_populates="owner")
+
+
+class VKUser(Base):
     __tablename__ = "vk_users"
     id = sq.Column(sq.Integer, autoincrement=True, primary_key=True)
     vk_user_id = sq.Column(sq.String(20), nullable=False)
@@ -13,35 +20,27 @@ class VK_Users(Base):
     city = sq.Column(sq.String(20), nullable=False)
     sex = sq.Column(sq.Boolean, nullable=False)
     birth_date = sq.Column(sq.Date, nullable=False)
-    url = sq.Column(sq.String(100), nullable=False)
-    vk_owner_id = sq.Column(sq.Integer, sq.ForeignKey("owners.vk_owner_id"), nullable=False)
-    photos = relationship("Photos", back_populates="vk_user")
-    favourites = relationship("Favourites", back_populates="vk_user")
+    url = sq.Column(sq.String, nullable=False)
+    photos = relationship("Photo", back_populates="vk_user")
+    favourites = relationship("Favourite", back_populates="vk_user")
 
 
-class Photos(Base):
+class Photo(Base):
     __tablename__ = "photos"
     id = sq.Column(sq.Integer, autoincrement=True, primary_key=True)
-    vk_user_id = sq.Column(sq.Integer, sq.ForeignKey("vk_users.vk_user_id"), nullable=False)
-    url = sq.Column(sq.String(100), nullable=False)
+    vk_user_id = sq.Column(sq.Integer, sq.ForeignKey("vk_users.id"), nullable=False)
+    url = sq.Column(sq.String, nullable=False)
     likes = sq.Column(sq.Integer, nullable=False)
-    vk_user = relationship("VK_Users", back_populates="photos")
-    owner = relationship("Owners", back_populates="owners")
+    vk_user = relationship("VKUser", back_populates="photos")
 
 
-class Favourites(Base):
+class Favourite(Base):
     __tablename__ = "favourites"
     id = sq.Column(sq.Integer, autoincrement=True, primary_key=True)
-    vk_user_id = sq.Column(sq.Integer, sq.ForeignKey("vk_users.vk_user_id"), nullable=False)
-    vk_owner_id = sq.Column(sq.Integer, sq.ForeignKey("owners.vk_owner_id"), nullable=False)
-    vk_user = relationship("VK_Users", back_populates="favourites")
-    owner = relationship("Owners", back_populates="favourites")
+    vk_user_id = sq.Column(sq.Integer, sq.ForeignKey("vk_users.id"), nullable=False)
+    vk_owner_id = sq.Column(sq.Integer, sq.ForeignKey("owners.id"), nullable=False)
+    vk_user = relationship("VKUser", back_populates="favourites")
+    owner = relationship("Owner", back_populates="favourites")
 
 
-class Owners(Base):
-    __tablename__ = "owners"
-    id = sq.Column(sq.Integer, autoincrement=True, primary_key=True)
-    user_id = sq.Column(sq.String(20), nullable=False)
-    vk_owner_id = sq.Column(sq.Integer, nullable=False)
-    favourites = relationship("Favourites", back_populates="owner")
-    vk_users = relationship("VK_Users", back_populates="owner")
+
