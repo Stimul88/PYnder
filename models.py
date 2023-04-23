@@ -41,6 +41,3 @@ class Favourite(Base):
     vk_owner_id = sq.Column(sq.Integer, sq.ForeignKey("owners.id"), nullable=False)
     vk_user = relationship("VKUser", back_populates="favourites")
     owner = relationship("Owner", back_populates="favourites")
-
-
-

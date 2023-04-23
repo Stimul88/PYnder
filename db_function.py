@@ -69,6 +69,10 @@ def upload_vk_record(session_1, new_record: dict, new_images: dict) -> bool:
     :return: boolean - True if record was uploaded, False if not
     """
     with session_1 as db:
+        if is_exists(
+            session_1, m.VKUser.vk_user_id, "vk_user_id", new_record["vk_user_id"]
+        ):
+            return False
         my_record = m.VKUser(
             vk_user_id=new_record["vk_user_id"],
             first_name=new_record["first_name"],
@@ -76,7 +80,7 @@ def upload_vk_record(session_1, new_record: dict, new_images: dict) -> bool:
             city=new_record["city"],
             sex=new_record["sex"],
             birth_date=new_record["birth_date"],
-            url=new_record["url"]
+            url=new_record["url"],
         )
         db.add(my_record)
         db.commit()
@@ -97,9 +101,15 @@ def upload_owner_record(session_1, new_record: dict) -> bool:
     :return: boolean - True if record was uploaded, False if not
     """
     with session_1 as db:
+        if is_exists(
+            session_1, m.Owner.vk_owner_id, "vk_owner_id", new_record["vk_owner_id"]
+        ):
+            return False
         my_record = m.Owner(vk_owner_id=new_record["vk_owner_id"])
         db.add(my_record)
         db.commit()
+    return True
+
 
 def upload_favourite_record(session_1, new_record: dict) -> bool:
     """
@@ -109,20 +119,30 @@ def upload_favourite_record(session_1, new_record: dict) -> bool:
     :return: boolean - True if record was uploaded, False if not
     """
     with session_1 as db:
+        is_user = is_exists(
+            session_1, m.Favourite.vk_user_id, "vk_user_id", new_record["vk_user_id"]
+        )
+        is_vk = is_exists(
+            session_1, m.Favourite.vk_owner_id, "vk_owner_id", new_record["vk_owner_id"]
+        )
+        if is_vk or is_user:
+            return False
         my_record = m.Favourite(
             vk_user_id=new_record["vk_user_id"], vk_owner_id=new_record["vk_owner_id"]
         )
         db.add(my_record)
         db.commit()
+        return True
 
 
-def is_exists(session_2, table_, column_: str, value_: str) -> bool:
+def is_exists(session_2, source_, property_: str, value_: str) -> bool:
     """
     :param session_2: sessionmaker object
-    :param table_: Base inherited class object
-    :param column_: column name: str
+    :param source_: Table and property object
+    :param property_: property name: str
     :param value_: value to be checked
     :return: True if value already exists, False if not
     """
-    my_query = session_2.query(f"{table_}.{column_}").filter_by(column_=value_)
-    result = my_query.all()
+    my_filter = {property_: value_}
+    my_query = session_2.query(source_).filter_by(**my_filter)
+    return len(my_query.all()) != 0

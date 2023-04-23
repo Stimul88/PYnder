@@ -3,8 +3,8 @@ import sqlalchemy as sq
 from sqlalchemy.orm import sessionmaker
 
 engine = sq.create_engine(dbf.get_db_config("db.ini"))
-dbf.delete_structure(engine)
-dbf.create_structure(engine)
+# dbf.delete_structure(engine)
+# dbf.create_structure(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -26,11 +26,14 @@ images_dict = {
 
 owners_dict = {
     # "id": 1,
-    "vk_owner_id": "781362360",}
+    "vk_owner_id": "781362360",
+}
 favourites_dict = {
     # "id": 1,
-    "vk_user_id": "1", "vk_owner_id": "1",}
+    "vk_user_id": "1",
+    "vk_owner_id": "1",
+}
 
-dbf.upload_owner_record(session, owners_dict)
-dbf.upload_vk_record(session, vk_user_dict, images_dict)
-dbf.upload_favourite_record(session, favourites_dict)
+print(dbf.upload_owner_record(session, owners_dict))
+print(dbf.upload_vk_record(session, vk_user_dict, images_dict))
+print(dbf.upload_favourite_record(session, favourites_dict))
