@@ -63,9 +63,9 @@ def upload_vk_record(session_1, new_record: dict, new_images: dict) -> bool:
     Function uploads record to the database\n
     :param session_1: sessionmaker object
     :param new_record:
-    dictionary{vk_user_id:str, first_name:str,last_name:str,city:str,sex:bool,birth_date:date,url:str}
+    dictionary{vk_user_id:str(50), first_name:str(20),last_name:str(20),city(20):str,sex:bool,birth_date:date,url:str}
     :param new_images:
-    dictionary{vk_user_id:str, images:list[url:str,likes:int]}
+    dictionary{vk_user_id:str(50), images:list[url:str,likes:int]}
     :return: boolean - True if record was uploaded, False if not
     """
     with session_1 as db:
@@ -137,6 +137,7 @@ def upload_favourite_record(session_1, new_record: dict) -> bool:
 
 def is_exists(session_2, source_, property_: str, value_: str) -> bool:
     """
+    Function checks is the value exists in source_ object
     :param session_2: sessionmaker object
     :param source_: Table and property object
     :param property_: property name: str
