@@ -7,7 +7,7 @@ Base = declarative_base()
 class Owner(Base):
     __tablename__ = "owners"
     vk_owner_id = sq.Column(sq.String(50), primary_key=True)
-    favourites = relationship("Favourite", back_populates="owner")
+    favorites = relationship("Favorite", back_populates="owner")
 
 
 class VKUser(Base):
@@ -20,7 +20,8 @@ class VKUser(Base):
     birth_date = sq.Column(sq.Date, nullable=False)
     url = sq.Column(sq.String, nullable=False)
     photos = relationship("Photo", back_populates="vk_user")
-    favourites = relationship("Favourite", back_populates="vk_user")
+    favorites = relationship("Favorite", back_populates="vk_user")
+
 
 #
 class Photo(Base):
@@ -32,10 +33,14 @@ class Photo(Base):
     vk_user = relationship("VKUser", back_populates="photos")
 
 
-class Favourite(Base):
+class Favorite(Base):
     __tablename__ = "favourites"
     id = sq.Column(sq.Integer, autoincrement=True, primary_key=True)
-    vk_user_id = sq.Column(sq.String(50), sq.ForeignKey("vk_users.vk_user_id"), nullable=False)
-    vk_owner_id = sq.Column(sq.String(50), sq.ForeignKey("owners.vk_owner_id"), nullable=False)
-    vk_user = relationship("VKUser", back_populates="favourites")
-    owner = relationship("Owner", back_populates="favourites")
+    vk_user_id = sq.Column(
+        sq.String(50), sq.ForeignKey("vk_users.vk_user_id"), nullable=False
+    )
+    vk_owner_id = sq.Column(
+        sq.String(50), sq.ForeignKey("owners.vk_owner_id"), nullable=False
+    )
+    vk_user = relationship("VKUser", back_populates="favorites")
+    owner = relationship("Owner", back_populates="favorites")

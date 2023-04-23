@@ -25,11 +25,12 @@ images_dict = {
 owners_dict = {
     "vk_owner_id": "a123123",
 }
-favourites_dict = {
+favorites_dict = {
     "vk_user_id": "a781362360",
     "vk_owner_id": "a123123",
 }
 
-print(dbf.upload_owner_record(session, owners_dict))
-print(dbf.upload_vk_record(session, vk_user_dict, images_dict))
-print(dbf.upload_favourite_record(session, favourites_dict))
+print(dbf.upload_owner(session, owners_dict))
+print(dbf.upload_vk(session, vk_user_dict))
+print(dbf.upload_images(session, images_dict))
+print(dbf.upload_favorite(session, favorites_dict))
