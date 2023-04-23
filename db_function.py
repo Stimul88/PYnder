@@ -4,7 +4,7 @@ from configparser import ConfigParser as CP
 import models as m
 
 
-def get_db_config(ini_file: str = 'db.ini') -> str:
+def get_db_config(ini_file: str = "db.ini") -> str:
     """
     Function reads from ini file following parameters from section [DataBase]:\n
     IP = IP address where DB is running in general format, e.g. 127.0.0.1\n
@@ -18,22 +18,22 @@ def get_db_config(ini_file: str = 'db.ini') -> str:
     """
 
     if not os.path.exists(ini_file):
-        print(f'Configuration file \'{ini_file}\' not found.')
+        print(f"Configuration file '{ini_file}' not found.")
         exit()
 
     config = CP()
     config.read(ini_file)
     try:
-        db_ip = config.get('DataBase', 'IP')
-        db_port = config.get('DataBase', 'Port')
-        db_name = config.get('DataBase', 'DBName')
-        db_user = config.get('DataBase', 'User')
-        db_pwd = config.get('DataBase', 'Password')
+        db_ip = config.get("DataBase", "IP")
+        db_port = config.get("DataBase", "Port")
+        db_name = config.get("DataBase", "DBName")
+        db_user = config.get("DataBase", "User")
+        db_pwd = config.get("DataBase", "Password")
     except configparser.Error as error_msg:
-        print(f'Error occurred. {error_msg}')
+        print(f"Error occurred. {error_msg}")
         exit()
 
-    return f'postgresql://{db_user}:{db_pwd}@{db_ip}:{db_port}/{db_name}'
+    return f"postgresql://{db_user}:{db_pwd}@{db_ip}:{db_port}/{db_name}"
 
 
 def create_structure(engine):
@@ -43,7 +43,7 @@ def create_structure(engine):
     :return: None\n
     """
 
-    print('Creating structure')
+    print("Creating structure")
     m.Base.metadata.create_all(engine)
 
 
@@ -54,5 +54,70 @@ def delete_structure(engine):
     :return: None\n
     """
 
-    print('Deleting structure')
+    print("Deleting structure")
     m.Base.metadata.drop_all(engine)
+
+
+def upload_vk_record(session_1, new_record: dict, new_images: dict) -> bool:
+    """
+    Function uploads record to the database\n
+    :param session_1: sessionmaker object
+    :param new_record:
+    dictionary{vk_user_id:str, first_name:str,last_name:str,city:str,sex:bool,birth_date:date,url:str,owner_id:int}
+    :param new_images:
+    dictionary{vk_user_id:str, images:list[url:str,likes:int]}
+    :return: boolean - True if record was uploaded, False if not
+    """
+    my_record = m.VK_Users(
+        vk_user_id=new_record["vk_user_id"],
+        first_name=new_record["first_name"],
+        last_name=new_record["last_name"],
+        city=new_record["city"],
+        sex=new_record["sex"],
+        birth_date=new_record["birth_date"],
+        url=new_record["url"],
+        vk_owner_id=new_record["vk_owner_id"],
+    )
+    session_1.add(my_record)
+    for image in new_images["images"]:
+        my_record = m.Photos(
+            vk_user_id=new_images["vk_user_id"], url=image[0], likes=image[1]
+        )
+        session_1.add(my_record)
+
+
+def upload_owner_record(session_1, new_record: dict) -> bool:
+    """
+    Function uploads record to the database\n
+    :param session_1: sessionmaker object
+    :param new_record:
+    dictionary{user_id:str}
+    :return: boolean - True if record was uploaded, False if not
+    """
+    my_record = m.VK_Users(vk_owner_id=new_record["vk_owner_id"])
+    session_1.add(my_record)
+
+
+def upload_favourite_record(session_1, new_record: dict) -> bool:
+    """
+    :param session_1: sessionmaker object
+    :param new_record:
+    dictionary{vk_user_id: str, owner_id:int}
+    :return: boolean - True if record was uploaded, False if not
+    """
+    my_record = m.Favourites(
+        vk_user_id=new_record["vk_user_id"], vk_owner_id=new_record["vk_owner_id"]
+    )
+    session_1.add(my_record)
+
+
+def is_exists(session_2, table_, column_: str, value_: str) -> bool:
+    """
+    :param session_2: sessionmaker object
+    :param table_: Base inherited class object
+    :param column_: column name: str
+    :param value_: value to be checked
+    :return: True if value already exists, False if not
+    """
+    my_query = session_2.query(f"{table_}.{column_}").filter_by(column_=value_)
+    result = my_query.all()
