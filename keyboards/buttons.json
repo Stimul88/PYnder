@@ -1,0 +1,26 @@
+{
+  "one_time": false,
+  "buttons": [
+    [{
+      "action": {
+        "type": "text",
+        "label": "следующий"
+      },
+      "color": "primary"
+    },
+      {
+        "action": {
+          "type": "text",
+          "label": "добавить"
+        },
+        "color": "positive"
+      }],
+    [{
+        "action": {
+          "type": "text",
+          "label": "посмотреть список"
+        },
+        "color": "negative"
+      }]
+  ]
+}

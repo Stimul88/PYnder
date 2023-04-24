@@ -1,0 +1,2 @@
+python-dotenv==0.21.1
+vk_api==11.9.9
