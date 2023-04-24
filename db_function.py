@@ -1,6 +1,5 @@
 import os.path
 import configparser
-from configparser import ConfigParser as CP
 import models as m
 
 
@@ -8,7 +7,7 @@ def get_db_config(ini_file: str = "db.ini") -> str:
     """
     Function reads from ini file following parameters from section [DataBase]:\n
     IP = IP address where DB is running in general format, e.g. 127.0.0.1\n
-    Port = database port in common format, e.g. 5432\n
+    Port = database port, e.g. 5432\n
     DBName = database name\n
     User = username\n
     Password = password\n
@@ -21,7 +20,7 @@ def get_db_config(ini_file: str = "db.ini") -> str:
         print(f"Configuration file '{ini_file}' not found.")
         exit()
 
-    config = CP()
+    config = configparser.ConfigParser()
     config.read(ini_file)
     try:
         db_ip = config.get("DataBase", "IP")
@@ -58,100 +57,110 @@ def delete_structure(engine):
     m.Base.metadata.drop_all(engine)
 
 
-def upload_vk(session_1, new_record: dict) -> bool:
+def add_owner(session_1, owner_id_: str) -> bool:
     """
     Function uploads record to the database\n
     :param session_1: sessionmaker object
+    :param owner_id_: str(50) - owner ID
+    :return: boolean - True if record was uploaded, False if not (already exists)
+    """
+    with session_1 as db:
+        if not is_exists(
+                session_1, m.Owner.vk_owner_id, "vk_owner_id", owner_id_
+        ):
+            my_record = m.Owner(vk_owner_id=owner_id_)
+            db.add(my_record)
+            db.commit()
+            print(f'Owner {owner_id_} added')
+            return True
+    return False
+
+
+def add_favorite(session_, new_record: dict, owner_id_: str):
+    """
+    :param session_: sessionmaker object
     :param new_record:
-    dictionary{vk_user_id:str(50), first_name:str(20),last_name:str(20),city(20):str,sex:bool,birth_date:date,url:str}
-    :return: boolean - True if record was uploaded, False if not
+    dictionary{
+        vk_user_id:str(50),
+        first_name:str(20),
+        last_name:str(20),
+        city(20):str,
+        sex:bool,
+        birth_date:date,
+        url:str,
+        images[['image_1.jpg, likes_1], ['image_2.jpg, likes_2], ['image_3.jpg, likes_3]]
+        }
+    :param owner_id_: str(50) - Owner's VK ID
     """
-    with session_1 as db:
-        if is_exists(
-            session_1, m.VKUser.vk_user_id, "vk_user_id", new_record["vk_user_id"]
-        ):
-            return False
-        my_record = m.VKUser(
-            vk_user_id=new_record["vk_user_id"],
-            first_name=new_record["first_name"],
-            last_name=new_record["last_name"],
-            city=new_record["city"],
-            sex=new_record["sex"],
-            birth_date=new_record["birth_date"],
-            url=new_record["url"],
-        )
-        db.add(my_record)
-        db.commit()
-        return True
 
-
-def upload_images(session_1, new_images: dict) -> bool:
-    """
-    Function uploads record to the database\n
-    :param session_1: sessionmaker object
-    :param new_images:
-    dictionary{vk_user_id:str(50), images:list[url:str,likes:int]}
-    :return: boolean - True if record was uploaded, False if not
-    """
-    with session_1 as db:
-        if is_exists(
-            session_1, m.Photo.vk_user_id, "vk_user_id", new_images["vk_user_id"]
+    # adding IDs into the table VKUsers if not exists
+    with session_ as db:
+        if not is_exists(
+                session_, m.VKUser.vk_user_id, "vk_user_id", new_record["vk_user_id"]
         ):
-            return False
-        db.commit()
-        for image in new_images["images"]:
-            my_record = m.Photo(
-                vk_user_id=new_images["vk_user_id"], url=image[0], likes=image[1]
+            my_record = m.VKUser(
+                vk_user_id=new_record["vk_user_id"],
+                first_name=new_record["first_name"],
+                last_name=new_record["last_name"],
+                city=new_record["city"],
+                sex=new_record["sex"],
+                birth_date=new_record["birth_date"],
+                url=new_record["url"],
             )
             db.add(my_record)
             db.commit()
-        return True
+            print(f'Record for user {new_record["vk_user_id"]} added')
+
+# Getting primaty keys for the Favorite table
+        my_query = db.query(m.Owner.id).filter_by(vk_owner_id=owner_id_)
+        owner_pk = my_query.one()[0]
+        my_query = db.query(m.VKUser.id).filter_by(vk_user_id=new_record["vk_user_id"])
+        user_pk = my_query.one()[0]
+
+        # adding photos into the table Photo
+        for image in new_record["images"]:
+            my_record = m.Photo(
+                user_id=user_pk, url=image[0], likes=image[1]
+            )
+            db.add(my_record)
+            db.commit()
+            print(f'Image {image[0]} added')
+
+        # adding IDs into the table Favorite
 
 
-def upload_owner(session_1, new_record: dict) -> bool:
-    """
-    Function uploads record to the database\n
-    :param session_1: sessionmaker object
-    :param new_record:
-    dictionary{user_id:str}
-    :return: boolean - True if record was uploaded, False if not
-    """
-    with session_1 as db:
-        if is_exists(
-            session_1, m.Owner.vk_owner_id, "vk_owner_id", new_record["vk_owner_id"]
-        ):
-            return False
-        my_record = m.Owner(vk_owner_id=new_record["vk_owner_id"])
-        db.add(my_record)
-        db.commit()
-    return True
-
-
-def upload_favorite(session_1, new_record: dict) -> bool:
-    """
-    :param session_1: sessionmaker object
-    :param new_record:
-    dictionary{vk_user_id: str, owner_id:int}
-    :return: boolean - True if record was uploaded, False if not
-    """
-    with session_1 as db:
-        is_user = is_exists(
-            session_1, m.Favorite.vk_user_id, "vk_user_id", new_record["vk_user_id"]
-        )
-        is_vk = is_exists(
-            session_1, m.Favorite.vk_owner_id, "vk_owner_id", new_record["vk_owner_id"]
-        )
-        if is_vk or is_user:
-            return False
         my_record = m.Favorite(
-            vk_user_id=new_record["vk_user_id"], vk_owner_id=new_record["vk_owner_id"]
+            user_id=user_pk, owner_id=owner_pk
         )
         db.add(my_record)
         db.commit()
-        return True
+        print(f'Favorite record added')
 
 
-def is_exists(session_2, source_, property_: str, value_: str) -> bool:
+# def delete_favorite(session_, vk_user_id_, owner_id_: str) -> bool:
+#     """
+#     :param session_: sessionmaker object
+#     :param vk_user_id_: str(50) - VK User ID to be removed
+#     :param owner_id_: str(50) - Owner's VK ID
+#     :return: boolean - True if record was uploaded, False if not
+#     """
+#
+# # checking is this record exists, if not - exiting
+#     is_user = is_exists(
+#         session_, m.Favorite.vk_user_id, "vk_user_id", vk_user_id_
+#     )
+#     is_owner = is_exists(
+#         session_, m.Favorite.vk_owner_id, "vk_owner_id", owner_id_
+#     )
+#     with session_ as db:
+#         if is_owner and is_user:
+#             my_query = session_.query(m.Favorite.vk_user_id, m.Favorite.vk_owner_id).\
+#                 filter_by(vk_user_id=vk_user_id_, owner_id=owner_id_).delete()
+#             db.add(my_query)
+#             db.commit()
+
+
+def is_exists(session_, source_, property_: str, value_: str) -> bool:
     """
     Function checks is the value exists in source_ object
     :param session_2: sessionmaker object
@@ -161,5 +170,5 @@ def is_exists(session_2, source_, property_: str, value_: str) -> bool:
     :return: True if value already exists, False if not
     """
     my_filter = {property_: value_}
-    my_query = session_2.query(source_).filter_by(**my_filter)
+    my_query = session_.query(source_).filter_by(**my_filter)
     return len(my_query.all()) != 0
