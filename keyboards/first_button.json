@@ -1,0 +1,12 @@
+{
+  "one_time": false,
+  "buttons": [
+    [{
+        "action": {
+          "type": "text",
+          "label": "Поиск подходящих знакомств"
+        },
+        "color": "secondary"
+      }]
+  ]
+}
