@@ -37,11 +37,7 @@ class Photo(Base):
 class Favorite(Base):
     __tablename__ = "favorites"
     id = sq.Column(sq.Integer, autoincrement=True, primary_key=True)
-    user_id = sq.Column(
-        sq.Integer, sq.ForeignKey("vk_users.id"), nullable=False
-    )
-    owner_id = sq.Column(
-        sq.Integer, sq.ForeignKey("owners.id"), nullable=False
-    )
+    user_id = sq.Column(sq.Integer, sq.ForeignKey("vk_users.id"), nullable=False)
+    owner_id = sq.Column(sq.Integer, sq.ForeignKey("owners.id"), nullable=False)
     vk_user = relationship("VKUser", back_populates="favorites")
     owner = relationship("Owner", back_populates="favorites")
