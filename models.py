@@ -7,14 +7,14 @@ Base = declarative_base()
 class Owner(Base):
     __tablename__ = "owners"
     id = sq.Column(sq.Integer, primary_key=True, autoincrement=True)
-    vk_owner_id = sq.Column(sq.String(50), nullable=False)
+    vk_id = sq.Column(sq.String(50), nullable=False)
     favorites = relationship("Favorite", back_populates="owner")
 
 
 class VKUser(Base):
     __tablename__ = "vk_users"
     id = sq.Column(sq.Integer, primary_key=True, autoincrement=True)
-    vk_user_id = sq.Column(sq.String(50), nullable=False)
+    vk_id = sq.Column(sq.String(50), nullable=False)
     first_name = sq.Column(sq.String(20), nullable=False)
     last_name = sq.Column(sq.String(20), nullable=False)
     city = sq.Column(sq.String(20), nullable=False)
@@ -35,7 +35,7 @@ class Photo(Base):
 
 
 class Favorite(Base):
-    __tablename__ = "favourites"
+    __tablename__ = "favorites"
     id = sq.Column(sq.Integer, autoincrement=True, primary_key=True)
     user_id = sq.Column(
         sq.Integer, sq.ForeignKey("vk_users.id"), nullable=False
