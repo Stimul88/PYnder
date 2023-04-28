@@ -15,7 +15,6 @@ class PYnder_DB():
             self.create_structure()
             self.import_test_data()
 
-
     def get_favorite(self, vk_owner_id_: str) -> list:
         """
         Function returns the favorites list for the mentioned owner
@@ -31,11 +30,12 @@ class PYnder_DB():
             images[{'url':'image_1.jpg', likes: 5}, {'url':'image_2.jpg', likes: 3}, {'url':'image_3.jpg', likes: 15}]
             }
         """
+        favorite_list = []
         with self.session as db:
+            # reading data from tables
             owner_pk_ = self.get_pk(m.Owner.id, vk_owner_id_)
             if owner_pk_ == -1:
                 return []
-
             my_query = db.query(m.Owner.id,
                                 m.VKUser.vk_id,
                                 m.VKUser.first_name,
@@ -50,7 +50,30 @@ class PYnder_DB():
             my_query = my_query.join(m.VKUser, m.VKUser.id == m.Favorite.user_id)
             my_query = my_query.join(m.Photo, m.Photo.user_id == m.VKUser.id)
             result = my_query.all()
-            return result
+            # print(result)
+            favorite_dict = {}
+            favorite_list = []
+            vk_ids = []
+            for element in result:
+                f_vkid = element[1]
+                if f_vkid not in vk_ids:
+                    vk_ids.append(f_vkid)
+                    favorite_dict['vk_id'] = element[1]
+                    favorite_dict['f_name'] = element[2]
+                    favorite_dict['l_name'] = element[3]
+                    favorite_dict['city'] = element[4]
+                    favorite_dict['sex'] = element[5]
+                    favorite_dict['b_date'] = f'{element[6].day}.{element[6].month}.{element[6].year}'
+                    favorite_dict['url'] = element[7]
+                    favorite_dict['images'] = [{'url': element[8], 'likes': element[9]}]
+                    favorite_list.append(favorite_dict.copy())
+                else:
+                    for index, item in enumerate(favorite_list):
+                        if item["vk_id"] == f_vkid:
+                            favorite_list[index]['images'].append({'url': element[8], 'likes': element[9]})
+                            break
+
+            return favorite_list
 
     def get_pk(self, table_, id_: str) -> int:
         """
@@ -97,6 +120,8 @@ class PYnder_DB():
 
     def delete_favorite(self, vk_user_id_: str, vk_owner_id_: str):
         """
+        Function removes record from favorites. If VK Usr is not belong to another Owner - remove from VKUsers and
+        Photos as well
         :param vk_user_id_: str(50) - VK User ID to be removed
         :param vk_owner_id_: str(50) - Owner's VK ID
         """
@@ -125,11 +150,11 @@ class PYnder_DB():
 
             # checking are there any other owners who added same VK ID into the favorites
             # if no - removing VK ID from other tables
-            my_query = db.query(m.Favorite.user_id).filter_by(user_id=vk_user_id_)
+            my_query = db.query(m.Favorite.user_id).filter_by(user_id=user_pk_)
             if my_query.count() == 0:
                 db.query(m.Photo).filter_by(user_id=user_pk_).delete()
                 db.commit()
-                db.query(m.VKUser).filter_by(vk_id=vk_user_id_).delete()
+                db.query(m.VKUser).filter_by(vk_id=user_pk_).delete()
                 db.commit()
 
     def get_db_config(self, ini_file: str = "db.ini") -> str:
@@ -199,6 +224,7 @@ class PYnder_DB():
 
     def add_favorite(self, new_record: dict, vk_owner_id_: str):
         """
+        Function adds record to favorites. Makes entry in Favorites, VKUsers and Photos tables
         :param new_record: dictionary{
             vk_id:str(50),
             first_name:str(20),
@@ -264,6 +290,24 @@ class PYnder_DB():
             "vk_id": "user_1",
             "first_name": "Test",
             "last_name": "User",
+            "city": "Москва",
+            "sex": True,
+            "birth_date": "30.06.1979",
+            "url": "https://vk.com/781362360",
+            "images": [
+                {"url": "image11.jpg", "likes": 12},
+                {"url": "image12.jpg", "likes": 212},
+                {"url": "image13.jpg", "likes": 132},
+            ],
+        }
+        self.add_favorite(vk_user_dict, owner_id)
+
+        owner_id = "owner_1"
+        self.add_owner(owner_id)
+        vk_user_dict = {
+            "vk_id": "user_2",
+            "first_name": "Test_2",
+            "last_name": "User_2",
             "city": "Москва",
             "sex": True,
             "birth_date": "30.06.1979",
