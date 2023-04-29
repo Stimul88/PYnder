@@ -3,7 +3,7 @@ from datetime import date
 
 def current_age(bday):
     today = date.today()
-    if len(bday) == 10:
+    if len(bday) >= 8:
         return today.year - int(bday[6:])
     else:
         return None
