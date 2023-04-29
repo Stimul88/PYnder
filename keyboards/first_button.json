@@ -4,7 +4,7 @@
     [{
         "action": {
           "type": "text",
-          "label": "Поиск подходящих знакомств"
+          "label": "Старт"
         },
         "color": "secondary"
       }]
