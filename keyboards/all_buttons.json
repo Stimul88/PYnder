@@ -36,13 +36,6 @@
           "label": "Просмотреть избранное"
         },
         "color": "negative"
-      }],
-    [{
-        "action": {
-          "type": "text",
-          "label": "что нибудь"
-        },
-        "color": "negative"
       }]
   ]
 }

@@ -9,13 +9,20 @@ vk_session = vk_api.VkApi(token=access_token)
 vk = vk_session.get_api()
 longpoll = VkLongPoll(vk_session)
 
+
 # функция вызова первой клавиатуры
 def first_keyboards(id, text):
     vk.messages.send(user_id=id, message=text, random_id=0, keyboard=open('keyboards/first_button.json', "r", encoding="UTF-8").read())
 
+
 # функция вызова втрой клавиатуры
-def second_keyboards(id, text):
-    vk.messages.send(user_id=id, message=text, random_id=0, keyboard=open('keyboards/buttons.json', "r", encoding="UTF-8").read())
+def all_buttons(id, text):
+    vk.messages.send(user_id=id, message=text, random_id=0, keyboard=open('keyboards/all_buttons.json', "r", encoding="UTF-8").read())
+
+
+def sender(id, text):
+    vk.messages.send(user_id=id, message=text, random_id=0)
+
 
 # логика бота
 for event in longpoll.listen():
@@ -23,13 +30,17 @@ for event in longpoll.listen():
         if event.to_me:
             msg = event.text.lower()
             id = event.user_id
-            if msg == 'поиск подходящих знакомств':
-                second_keyboards(id, 'Пользуйся')
-            elif msg == 'следующий':
+            if msg == 'старт':
+                all_buttons(id, 'Ну вот!')
+            elif msg == 'назад':
+                sender(id, 'че это?')
+            elif msg == 'дальше':
                 pass
-            elif msg == 'добавить':
+            elif msg == 'добавить в избранное':
                 pass
-            elif msg == 'посмотреть список':
+            elif msg == 'удалить из избранного':
+                pass
+            elif msg == 'просмотреть избранное':
                 pass
             elif len(msg) > 0:
-                first_keyboards(id, 'Привет!Я бот для поиска новых знакомств!Нажми на кнопку')
+                first_keyboards(id, 'Привет!Я бот для поиска новых знакомств!Нажми на кнопку Старт')
