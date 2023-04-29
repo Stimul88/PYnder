@@ -5,9 +5,41 @@ import sqlalchemy as sq
 from sqlalchemy.orm import sessionmaker
 
 
-class PYnder_DB():
+def get_db_config(ini_file: str = "db.ini") -> str:
+    """
+    Function reads from ini file following parameters from section [DataBase]:\n
+    IP = IP address where DB is running in general format, e.g. 127.0.0.1\n
+    Port = database port, e.g. 5432\n
+    DBName = database name\n
+    User = username\n
+    Password = password\n
+    :param ini_file: .ini filename with path if necessary, by default - db.ini\n
+    :return: DSN string for sqlalchemy engine creation:\n
+    postgresql://{db_user}:{db_pwd}@{db_ip}:{db_port}/{db_name}\n
+    """
+
+    if not os.path.exists(ini_file):
+        print(f"Configuration file '{ini_file}' not found.")
+        exit()
+
+    config = configparser.ConfigParser()
+    config.read(ini_file)
+    try:
+        db_ip = config.get("DataBase", "IP")
+        db_port = config.get("DataBase", "Port")
+        db_name = config.get("DataBase", "DBName")
+        db_user = config.get("DataBase", "User")
+        db_pwd = config.get("DataBase", "Password")
+    except configparser.Error as error_msg:
+        print(f"Error occurred. {error_msg}")
+        exit()
+
+    return f"postgresql://{db_user}:{db_pwd}@{db_ip}:{db_port}/{db_name}"
+
+
+class PYnder_DB:
     def __init__(self, rebuild: bool):
-        self.engine = sq.create_engine(self.get_db_config("db.ini"))
+        self.engine = sq.create_engine(get_db_config("db.ini"))
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
         if rebuild:
@@ -17,40 +49,40 @@ class PYnder_DB():
 
     def get_favorite(self, vk_owner_id_: str) -> list:
         """
-        Function returns the favorites list for the mentioned owner
+        Method returns the favorites list for the mentioned owner
         :param vk_owner_id_: str Owner's VK ID
         :return: list of dicts {
             vk_id:str(50),
             first_name:str(20),
             last_name:str(20),
             city(20):str,
-            sex:bool,
+            sex:integer,
             birth_date:date,
             url:str,
             images[{'url':'image_1.jpg', likes: 5}, {'url':'image_2.jpg', likes: 3}, {'url':'image_3.jpg', likes: 15}]
             }
         """
-        favorite_list = []
         with self.session as db:
-            # reading data from tables
+            # Reading data from tables
             owner_pk_ = self.get_pk(m.Owner.id, vk_owner_id_)
             if owner_pk_ == -1:
                 return []
-            my_query = db.query(m.Owner.id,
-                                m.VKUser.vk_id,
-                                m.VKUser.first_name,
-                                m.VKUser.last_name,
-                                m.VKUser.city,
-                                m.VKUser.sex,
-                                m.VKUser.birth_date,
-                                m.VKUser.url,
-                                m.Photo.url,
-                                m.Photo.likes).filter_by(id=owner_pk_)
+            my_query = db.query(
+                m.Owner.id,
+                m.VKUser.vk_id,
+                m.VKUser.first_name,
+                m.VKUser.last_name,
+                m.VKUser.city,
+                m.VKUser.sex,
+                m.VKUser.birth_date,
+                m.VKUser.url,
+                m.Photo.url,
+                m.Photo.likes,
+            ).filter_by(id=owner_pk_)
             my_query = my_query.join(m.Favorite, m.Favorite.owner_id == m.Owner.id)
             my_query = my_query.join(m.VKUser, m.VKUser.id == m.Favorite.user_id)
             my_query = my_query.join(m.Photo, m.Photo.user_id == m.VKUser.id)
             result = my_query.all()
-            # print(result)
             favorite_dict = {}
             favorite_list = []
             vk_ids = []
@@ -58,26 +90,30 @@ class PYnder_DB():
                 f_vkid = element[1]
                 if f_vkid not in vk_ids:
                     vk_ids.append(f_vkid)
-                    favorite_dict['vk_id'] = element[1]
-                    favorite_dict['f_name'] = element[2]
-                    favorite_dict['l_name'] = element[3]
-                    favorite_dict['city'] = element[4]
-                    favorite_dict['sex'] = element[5]
-                    favorite_dict['b_date'] = f'{element[6].day}.{element[6].month}.{element[6].year}'
-                    favorite_dict['url'] = element[7]
-                    favorite_dict['images'] = [{'url': element[8], 'likes': element[9]}]
+                    favorite_dict["vk_id"] = element[1]
+                    favorite_dict["f_name"] = element[2]
+                    favorite_dict["l_name"] = element[3]
+                    favorite_dict["city"] = element[4]
+                    favorite_dict["sex"] = element[5]
+                    favorite_dict[
+                        "b_date"
+                    ] = f"{element[6].day}.{element[6].month}.{element[6].year}"
+                    favorite_dict["url"] = element[7]
+                    favorite_dict["images"] = [{"url": element[8], "likes": element[9]}]
                     favorite_list.append(favorite_dict.copy())
                 else:
                     for index, item in enumerate(favorite_list):
                         if item["vk_id"] == f_vkid:
-                            favorite_list[index]['images'].append({'url': element[8], 'likes': element[9]})
+                            favorite_list[index]["images"].append(
+                                {"url": element[8], "likes": element[9]}
+                            )
                             break
 
             return favorite_list
 
     def get_pk(self, table_, id_: str) -> int:
         """
-        Function searches for a PK in mentioned table_ using id_
+        Method searches for a PK in mentioned table_ using id_
         :param table_ table object with parameter, e.g. m.VKUser.id
         :param id_: VK ID:
         :return: PK ID or -1 if not found
@@ -92,7 +128,7 @@ class PYnder_DB():
 
     def is_in_favorite(self, vk_user_id_: str, vk_owner_id_: str) -> bool:
         """
-        Function checks is there a VK User in Owner's Favorites
+        Method checks is there a VK User in Owner's Favorites
         :param vk_user_id_: User's VK ID
         :param vk_owner_id_: Owner's VK ID
         :return: True if in Favorites, False otherwise
@@ -118,15 +154,15 @@ class PYnder_DB():
             else:
                 return True
 
-    def delete_favorite(self, vk_user_id_: str, vk_owner_id_: str):
+    def delete_favorite(self, vk_user_id_: str, vk_owner_id_: str) -> bool:
         """
-        Function removes record from favorites. If VK Usr is not belong to another Owner - remove from VKUsers and
+        Method removes record from favorites. If VK Usr is not belong to another Owner - remove from VKUsers and
         Photos as well
         :param vk_user_id_: str(50) - VK User ID to be removed
         :param vk_owner_id_: str(50) - Owner's VK ID
         """
 
-        # checking is this record exists, if not - exiting
+        # Checking is record exists, if not - exiting
 
         with self.session as db:
             user_pk_ = self.get_pk(m.VKUser.id, vk_user_id_)
@@ -134,14 +170,14 @@ class PYnder_DB():
                 return False
             my_query = db.query(m.Favorite.user_id).filter_by(user_id=user_pk_)
             if my_query.count() == 0:
-                return
+                return False
 
             owner_pk_ = self.get_pk(m.Owner.id, vk_owner_id_)
             if owner_pk_ == -1:
                 return False
             my_query = db.query(m.Favorite.owner_id).filter_by(owner_id=owner_pk_)
             if my_query.count() == 0:
-                return
+                return False
 
             db.query(m.Favorite).filter_by(
                 user_id=user_pk_, owner_id=owner_pk_
@@ -156,41 +192,11 @@ class PYnder_DB():
                 db.commit()
                 db.query(m.VKUser).filter_by(vk_id=user_pk_).delete()
                 db.commit()
-
-    def get_db_config(self, ini_file: str = "db.ini") -> str:
-        """
-        Function reads from ini file following parameters from section [DataBase]:\n
-        IP = IP address where DB is running in general format, e.g. 127.0.0.1\n
-        Port = database port, e.g. 5432\n
-        DBName = database name\n
-        User = username\n
-        Password = password\n
-        :param ini_file: .ini filename with path if necessary, by default - db.ini\n
-        :return: DSN string for sqlalchemy engine creation:\n
-        postgresql://{db_user}:{db_pwd}@{db_ip}:{db_port}/{db_name}\n
-        """
-
-        if not os.path.exists(ini_file):
-            print(f"Configuration file '{ini_file}' not found.")
-            exit()
-
-        config = configparser.ConfigParser()
-        config.read(ini_file)
-        try:
-            db_ip = config.get("DataBase", "IP")
-            db_port = config.get("DataBase", "Port")
-            db_name = config.get("DataBase", "DBName")
-            db_user = config.get("DataBase", "User")
-            db_pwd = config.get("DataBase", "Password")
-        except configparser.Error as error_msg:
-            print(f"Error occurred. {error_msg}")
-            exit()
-
-        return f"postgresql://{db_user}:{db_pwd}@{db_ip}:{db_port}/{db_name}"
+            return True
 
     def create_structure(self):
         """
-        Function creates table structure described in models.py\n
+        Method creates table structure described in models.py\n
         :return: None\n
         """
 
@@ -199,7 +205,7 @@ class PYnder_DB():
 
     def delete_structure(self):
         """
-        Function deletes all current structure along with the data\n
+        Method deletes all current structure along with the data\n
         :return: None\n
         """
 
@@ -208,7 +214,7 @@ class PYnder_DB():
 
     def add_owner(self, owner_id_: str) -> bool:
         """
-        Function uploads record to the database\n
+        Method uploads record to the database\n
         :param owner_id_: str(50) - owner ID
         :return: boolean - True if record was uploaded, False if not (already exists)
         """
@@ -218,19 +224,18 @@ class PYnder_DB():
                 my_record = m.Owner(vk_id=owner_id_)
                 db.add(my_record)
                 db.commit()
-                print(f"Owner {owner_id_} added")
                 return True
         return False
 
-    def add_favorite(self, new_record: dict, vk_owner_id_: str):
+    def add_favorite(self, new_record: dict, vk_owner_id_: str) -> bool:
         """
-        Function adds record to favorites. Makes entry in Favorites, VKUsers and Photos tables
+        Method adds record to favorites. Makes entry in Favorites, VKUsers and Photos tables
         :param new_record: dictionary{
             vk_id:str(50),
             first_name:str(20),
             last_name:str(20),
             city(20):str,
-            sex:bool,
+            sex:integer,
             birth_date:date,
             url:str,
             images[{'url':'image_1.jpg', likes: 5}, {'url':'image_2.jpg', likes: 3}, {'url':'image_3.jpg', likes: 15}]
@@ -254,10 +259,8 @@ class PYnder_DB():
                 )
                 db.add(my_record)
                 db.commit()
-                print(f'Record for user {new_record["vk_id"]} added')
 
             # Getting primary keys for the Favorite table
-
             user_pk_ = self.get_pk(m.VKUser.id, new_record["vk_id"])
             if user_pk_ == -1:
                 return False
@@ -266,22 +269,22 @@ class PYnder_DB():
                 return False
 
             if not is_user_exists:
-                # adding photos into the table Photo if user not exists
+                # Adding photos into the table Photo if user not exists
                 for image in new_record["images"]:
                     my_record = m.Photo(
                         user_id=user_pk_, url=image["url"], likes=image["likes"]
                     )
                     db.add(my_record)
                     db.commit()
-                    print(f"Image {image['url']} added")
 
-            # adding IDs into the table Favorite if not exists
-            my_query = db.query(m.Favorite).filter_by(user_id=user_pk_, owner_id=owner_pk_)
+            # Adding IDs into the table Favorite if not exists
+            my_query = db.query(m.Favorite).filter_by(
+                user_id=user_pk_, owner_id=owner_pk_
+            )
             if my_query.count() == 0:
                 my_record = m.Favorite(user_id=user_pk_, owner_id=owner_pk_)
                 db.add(my_record)
                 db.commit()
-                print(f"Favorite record added")
 
     def import_test_data(self):
         owner_id = "owner_1"
@@ -291,7 +294,7 @@ class PYnder_DB():
             "first_name": "Test",
             "last_name": "User",
             "city": "Москва",
-            "sex": True,
+            "sex": 1,
             "birth_date": "30.06.1979",
             "url": "https://vk.com/781362360",
             "images": [
@@ -309,7 +312,7 @@ class PYnder_DB():
             "first_name": "Test_2",
             "last_name": "User_2",
             "city": "Москва",
-            "sex": True,
+            "sex": 2,
             "birth_date": "30.06.1979",
             "url": "https://vk.com/781362360",
             "images": [
@@ -327,7 +330,7 @@ class PYnder_DB():
             "first_name": "Test",
             "last_name": "User",
             "city": "Москва",
-            "sex": True,
+            "sex": 1,
             "birth_date": "30.06.1979",
             "url": "https://vk.com/781362360",
             "images": [
@@ -345,7 +348,7 @@ class PYnder_DB():
             "first_name": "Test_2",
             "last_name": "User_2",
             "city": "Toronto",
-            "sex": False,
+            "sex": 2,
             "birth_date": "30.06.1979",
             "url": "https://vk.com/a123",
             "images": [
@@ -363,7 +366,7 @@ class PYnder_DB():
             "first_name": "Test",
             "last_name": "User",
             "city": "Москва",
-            "sex": True,
+            "sex": 1,
             "birth_date": "30.06.1979",
             "url": "https://vk.com/781362360",
             "images": [
@@ -381,7 +384,7 @@ class PYnder_DB():
             "first_name": "Test",
             "last_name": "User",
             "city": "Washington",
-            "sex": False,
+            "sex": 2,
             "birth_date": "30.06.1979",
             "url": "https://vk.com/222",
             "images": [
