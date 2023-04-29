@@ -2,8 +2,13 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 import os
 from dotenv import load_dotenv
+import json
+
+import db_function as dbf
 
 from vk_search import get_
+
+my_pynder = dbf.PYnder_DB(rebuild=True)
 
 load_dotenv()
 
@@ -34,7 +39,7 @@ for event in longpoll.listen():
             msg = event.text.lower()
             id = event.user_id
             if msg == 'старт':
-                all_buttons(id, get_(id))
+                all_buttons(id, get_(str(id)))
                 # get_(str(id))
                 # print(id)
                 # all_buttons(id, 'Ну вот!')
@@ -45,7 +50,8 @@ for event in longpoll.listen():
             elif msg == 'дальше':
                 pass
             elif msg == 'добавить в избранное':
-                pass
+                my_pynder.add_favorite(get_(id), str(id))
+                # pass
             elif msg == 'удалить из избранного':
                 pass
             elif msg == 'просмотреть избранное':

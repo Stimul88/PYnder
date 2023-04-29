@@ -45,7 +45,7 @@ class PYnder_DB:
         if rebuild:
             self.delete_structure()
             self.create_structure()
-            self.import_test_data()
+            # self.import_test_data()
 
     def get_favorite(self, vk_owner_id_: str) -> list:
         """

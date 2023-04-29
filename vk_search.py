@@ -40,13 +40,13 @@ class Vk:
         else:
             sex_for_search = 2
         search_params = {
-            'age_from': user_age - 5,
-            'age_to': user_age + 5,
+            # 'age_from': user_age - 5,
+            # 'age_to': user_age + 5,
             'city_id': user_city,
             'sex': sex_for_search,
             'is_closed': False,
             'has_photo': 1,
-            'count': 1000,
+            'count': 10,
             'fields[]': ['city', 'sex', 'domain', 'bdate']
             }
 
@@ -92,11 +92,11 @@ class Vk:
             city = people['city']['title']
 
             data.append({
-                'firstname': people['first_name'],
+                'first_name': people['first_name'],
                 'last_name': people['last_name'],
                 'vk_id': people['id'],
                 'birth_date': people['bdate'],
-                'gender': people['sex'],
+                'sex': people['sex'],
                 'city': city
                          })
         return data
