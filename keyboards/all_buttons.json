@@ -1,0 +1,48 @@
+{
+  "one_time": false,
+  "buttons": [
+    [{
+      "action": {
+        "type": "text",
+        "label": "Назад"
+      },
+      "color": "primary"
+    },
+      {
+      "action": {
+        "type": "text",
+        "label": "Дальше"
+      },
+      "color": "primary"
+    }],
+    [{
+        "action": {
+          "type": "text",
+          "label": "Добавить в избранное"
+        },
+        "color": "positive"
+      },
+      {
+        "action": {
+          "type": "text",
+          "label": "Удалить из избранного"
+        },
+        "color": "positive"
+      }
+    ],
+    [{
+        "action": {
+          "type": "text",
+          "label": "Просмотреть избранное"
+        },
+        "color": "negative"
+      }],
+    [{
+        "action": {
+          "type": "text",
+          "label": "что нибудь"
+        },
+        "color": "negative"
+      }]
+  ]
+}
