@@ -39,13 +39,14 @@ for event in longpoll.listen():
             my_msg = event.message
             if msg == 'старт':
                 my_pynder.add_owner(str(id))
-                all_buttons(id, main(str(id)))
+                all_buttons(id, main(str(id), None))
             elif msg == 'назад':
-                sender(id, 'че это?')
+                # sender(id, 'че это?')
+                main(id, msg)
             elif msg == 'дальше':
-                pass
+                main(id, msg)
             elif msg == 'добавить в избранное':
-                for i in main(str(id)):
+                for i in main(str(id), msg):
                     # print(i)
                     my_pynder.add_favorite(i, str(id))
 

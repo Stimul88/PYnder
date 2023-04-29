@@ -28,14 +28,13 @@ class Vk:
 
         '''получаем параметры для поиска с помощью id пользователя который пишет, если их нет, просим задать вручную'''
 
-        params = {'user_ids': self.vk_id, 'fields': 'birth_date, city, sex'}
+        params = {'user_ids': self.vk_id, 'fields': 'bdate, city, sex'}
         response = requests.get(self.url + 'users.get', headers=self.headers, params={**self.params, **params}).json()
         try:
-            user_age = current_age(response['response'][0]['birth_date'])
+            user_age = current_age(response['response'][0]['bdate'])
         except:
             # user_age = age #сюда подставить возраст который напишет в вк сообщение
             user_age = 30
-            # continue
         try:
             user_city = response['response'][0]['city']['id']
         except:
@@ -45,8 +44,8 @@ class Vk:
         else:
             sex_for_search = 2
         search_params = {
-            'age_from': user_age - 5,
-            'age_to': user_age + 5,
+            # 'age_from': user_age - 5,
+            # 'age_to': user_age + 5,
             'city_id': user_city,
             'sex': sex_for_search,
             'is_closed': False,
@@ -100,7 +99,7 @@ class Vk:
                 'first_name': people['first_name'],
                 'last_name': people['last_name'],
                 'vk_id': str(people['id']),
-                # 'birth_date': people['birth_date'],
+                'birth_date': people['bdate'],
                 'sex': people['sex'],
                 'city': city
                          })
@@ -138,29 +137,27 @@ class Vk:
         return final_data
     def search_favorite(self, data):
 
-        return f'{data[self.search_index]["firstname"]} {data[self.search_index]["last_name"]} \n' \
+        return f'{data[self.search_index]["first_name"]} {data[self.search_index]["last_name"]} \n' \
               f'https://vk.ru/id{data[self.search_index]["vk_id"]} {data[self.search_index]["images"]}'
 
 
 
-# def main(vk_id, button_click):
-#     vk = Vk(vk_id)
-#     vk.search_index = 0
-#     data = vk.get_final_data()
-#     while True:
-#         vk.search_favorite(data)
-#         button = button_click
-#         if button == 'дальше':
-#             vk.search_index += 1
-#         elif button == 'назад':
-#             vk.search_index -= 1
-#         vk = Vk(vk_id)
-#         return vk.get_final_data()
-
-def main(vk_id):
+def main(vk_id, button_click):
     vk = Vk(vk_id)
-    return vk.get_final_data()
+    vk.search_index = 0
+    data = vk.get_final_data()
+    while True:
+        vk.search_favorite(data)
+        button = button_click
+        if button == 'дальше':
+            vk.search_index += 1
+        elif button == 'назад':
+            vk.search_index -= 1
 
+
+# def main(vk_id):
+#     vk = Vk(vk_id)
+#     return vk.get_final_data()
 
 # if __name__ == '__main__':
 #     main(vk_id='780086634')

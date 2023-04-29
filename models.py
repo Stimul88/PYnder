@@ -19,8 +19,8 @@ class VKUser(Base):
     last_name = sq.Column(sq.String(20), nullable=False)
     city = sq.Column(sq.String(20), nullable=False)
     sex = sq.Column(sq.Integer, nullable=False)
-    birth_date = sq.Column(sq.Date, nullable=False)
-    url = sq.Column(sq.String, nullable=False)
+    birth_date = sq.Column(sq.Date, nullable=True)
+    url = sq.Column(sq.String, nullable=True)
     photos = relationship("Photo", back_populates="vk_user")
     favorites = relationship("Favorite", back_populates="vk_user")
 
