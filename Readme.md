@@ -1,4 +1,5 @@
-PYnder
+# PYnder
+Netology course project#2
 
 1. Настройка базы данных производится через ini-файл. Файл содержит следющие парамерты в секции DataBase
 [DataBase]
