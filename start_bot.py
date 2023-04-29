@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 import db_function as dbf
-from vk_search import main
+from vk_search import Vk
 
 my_pynder = dbf.PYnder_DB(rebuild=True)
 
@@ -31,28 +31,44 @@ def sender(id, text):
 
 
 # логика бота
+
+
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW:
-        if event.to_me:
-            msg = event.text.lower()
-            id = event.user_id
-            my_msg = event.message
-            if msg == 'старт':
-                my_pynder.add_owner(str(id))
-                all_buttons(id, main(str(id), None))
-            elif msg == 'назад':
-                # sender(id, 'че это?')
-                main(id, msg)
-            elif msg == 'дальше':
-                main(id, msg)
-            elif msg == 'добавить в избранное':
-                for i in main(str(id), msg):
-                    # print(i)
-                    my_pynder.add_favorite(i, str(id))
+        index = 0
+        try:
+            if event.to_me:
+                id = event.user_id
+                vk_search = Vk(id)
+                data = vk_search.get_final_data()
+                msg = event.text.lower()
+                my_msg = event.message
 
-            elif msg == 'удалить из избранного':
-                pass
-            elif msg == 'просмотреть избранное':
-                pass
-            elif len(msg) > 0:
-                first_keyboards(id, 'Привет!Я бот для поиска новых знакомств!Нажми на кнопку Старт')
+                if msg == 'старт':
+                    sender(id, 'Секунду, ищу варианты для тебя')
+                    my_pynder.add_owner(str(id))
+                    all_buttons(id, vk_search.search_favorite(index, data))
+                    continue
+                if msg == 'назад':
+                    index -= 1
+                    print(index)
+                    all_buttons(id, vk_search.search_favorite(index, data))
+                    continue
+                if msg == 'дальше':
+                    index += 1
+                    print(index)
+                    all_buttons(id, vk_search.search_favorite(index, data))
+                    continue
+                if msg == 'добавить в избранное':
+                    pass
+                if msg == 'удалить из избранного':
+                    pass
+
+                if msg == 'просмотреть избранное':
+                    pass
+
+                if len(msg) > 0:
+                    first_keyboards(id, 'Привет!Я бот для поиска новых знакомств!Нажми на кнопку Старт')
+
+        except Exception as ex:
+            print(ex)

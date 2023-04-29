@@ -14,6 +14,7 @@ class Vk:
         self.vk_id = vk_id
         self.search_index = 0
 
+
     def get_city_id(self, city: str):
 
         '''когда у пользователя скрыт город, получаем id города из названия для вк апи'''
@@ -33,8 +34,8 @@ class Vk:
         try:
             user_age = current_age(response['response'][0]['bdate'])
         except:
-            # user_age = age #сюда подставить возраст который напишет в вк сообщение
-            user_age = 30
+            user_age = 30 #сюда подставить возраст который напишет в вк сообщение
+
         try:
             user_city = response['response'][0]['city']['id']
         except:
@@ -44,13 +45,13 @@ class Vk:
         else:
             sex_for_search = 2
         search_params = {
-            # 'age_from': user_age - 5,
-            # 'age_to': user_age + 5,
+            'age_from': user_age - 5,
+            'age_to': user_age + 5,
             'city_id': user_city,
             'sex': sex_for_search,
             'is_closed': False,
             'has_photo': 3,
-            'count': 10,
+            'count': 100,
             'fields[]': ['city', 'sex', 'domain', 'bdate']
             }
 
@@ -135,29 +136,10 @@ class Vk:
                 pass
 
         return final_data
-    def search_favorite(self, data):
+    def search_favorite(self, search_index, data):
+        links = ''
+        for photo in data[search_index]['images']:
+            links += (photo['url'] + '\n')
+        return f'{data[search_index]["first_name"]} {data[search_index]["last_name"]} \n' \
+              f'https://vk.ru/id{data[search_index]["vk_id"]} \n{links}'
 
-        return f'{data[self.search_index]["first_name"]} {data[self.search_index]["last_name"]} \n' \
-              f'https://vk.ru/id{data[self.search_index]["vk_id"]} {data[self.search_index]["images"]}'
-
-
-
-def main(vk_id, button_click):
-    vk = Vk(vk_id)
-    vk.search_index = 0
-    data = vk.get_final_data()
-    while True:
-        vk.search_favorite(data)
-        button = button_click
-        if button == 'дальше':
-            vk.search_index += 1
-        elif button == 'назад':
-            vk.search_index -= 1
-
-
-# def main(vk_id):
-#     vk = Vk(vk_id)
-#     return vk.get_final_data()
-
-# if __name__ == '__main__':
-#     main(vk_id='780086634')
