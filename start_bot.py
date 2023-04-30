@@ -32,47 +32,52 @@ def sender(id_, text):
 
 # логика бота
 
-
+index = 0
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW:
-        index = 0
+
         try:
             if event.to_me:
                 my_id = event.user_id
                 vk_search = Vk(my_id)
-                data = vk_search.get_final_data()
+                data_ = vk_search.get_final_data()
                 msg = event.text.lower()
                 my_msg = event.message
 
-                if msg == 'старт':
-                    sender(my_id, 'Секунду, ищу варианты для тебя')
-                    my_pynder.add_owner(str(my_id))
-                    data = vk_search.get_final_data()
-                    user_text, user_photo = vk_search.search_favorite(index, data, access_token)
-                    all_buttons(my_id, user_text, user_photo)
-                    continue
-                if msg == 'назад':
-                    index -= 1
-                    print(index)
-                    user_text, user_photo = vk_search.search_favorite(index, data, access_token)
-                    all_buttons(my_id, user_text, user_photo)
-                    continue
-                if msg == 'дальше':
-                    index += 1
-                    print(index)
-                    user_text, user_photo = vk_search.search_favorite(index, data, access_token)
-                    all_buttons(my_id, user_text, user_photo)
-                    continue
-                if msg == 'добавить в избранное':
-                    pass
-                if msg == 'удалить из избранного':
-                    pass
-
-                if msg == 'просмотреть избранное':
-                    pass
-
-                if len(msg) > 0:
-                    first_keyboards(my_id, 'Привет!Я бот для поиска новых знакомств!Нажми на кнопку Старт')
+                match msg:
+                    case 'старт':
+                        sender(my_id, 'Секунду, ищу варианты для тебя')
+                        my_pynder.add_owner(str(my_id))
+                        data_ = vk_search.get_final_data()
+                        user_text, user_photo = vk_search.search_favorite(index, data_)
+                        all_buttons(my_id, user_text, user_photo)
+                        # continue
+                    case 'назад':
+                        if index == 0:
+                            sender(my_id, 'Это самая первая запись, предыдущих нет.\n')
+                        else:
+                            index -= 1
+                            print(index)
+                            user_text, user_photo = vk_search.search_favorite(index, data_)
+                            all_buttons(my_id, user_text, user_photo)
+                            # continue
+                    case 'дальше':
+                        if index == len(data_):
+                            sender(my_id, 'Это последняя запись, выбирай из того что есть.\n')
+                        index += 1
+                        print(index)
+                        user_text, user_photo = vk_search.search_favorite(index, data_)
+                        all_buttons(my_id, user_text, user_photo)
+                        # continue
+                    case 'добавить в избранное':
+                        pass
+                    case 'удалить из избранного':
+                        pass
+                    case 'просмотреть избранное':
+                        pass
+                    case _:
+                        if len(msg) > 0:
+                            first_keyboards(my_id, 'Привет, я бот для поиска новых знакомств!\nНажми на кнопку Старт.\n')
 
         except Exception as ex:
             print(ex)

@@ -16,7 +16,7 @@ class Vk:
         self.search_index = 0
 
     def get_city_id(self, city: str):
-
+        # (Саша) временно закоментировал выбор города, возвращаю константу 1
         '''когда у пользователя скрыт город, получаем id города из названия для вк апи'''
         try:
             params = {'country_id': 1, 'q': city, 'count': 1}
@@ -33,12 +33,13 @@ class Vk:
         params = {'user_ids': self.vk_id, 'fields': 'bdate, city, sex'}
         response = requests.get(self.url + 'users.get', headers=self.headers, params={**self.params, **params}).json()
         try:
+            # (Саша) временно закомментировал выбор возраста
             user_age = 30
             # user_age = current_age(response['response'][0]['bdate'])
         except:
             user_age = 30  # сюда подставить возраст который напишет в вк сообщение
 
-        try:
+        try:    #(Саша) временно закомментировал выбор города
             user_city = 1
             # user_city = response['response'][0]['city']['id']
         except:
@@ -55,7 +56,7 @@ class Vk:
             'sex': sex_for_search,
             'is_closed': False,
             'has_photo': 3,
-            'count': 3,
+            'count': 10,
             'fields[]': ['city', 'sex', 'domain', 'bdate']
         }
 
@@ -123,6 +124,8 @@ class Vk:
             photos = []
             try:
                 for photo in response['response']['items']:
+                    # (Саша) закоммментировал выбор размера - это не нужно. В переменной link теперь не урл, а
+                    # айди фоток
                     # for size in photo['sizes']:
                     #     if 'w' in size['type'] or 'z' in size['type'] or 'y' in size['type'] or 'r' in size['type'] \
                     #             or 'q' in size['type'] or 'p' in size['type']:
@@ -130,6 +133,7 @@ class Vk:
                     link = photo['id']
                     result = {'url': link, 'likes': current_likes}
                     photos.append(result)
+                    #(Саша) не знаю зачем тут был бряк, закомментировал
                     # break
 
                 person['images'] = sort_photo_by_likes(photos)
@@ -139,7 +143,7 @@ class Vk:
 
         return final_data
 
-    def search_favorite(self, search_index, data_, access_token_):
+    def search_favorite(self, search_index, data_):
         # (Саша) Тима, я переписал вывод, отдельно возвращаю параметры найденной записи,
         # отдельно картинки в формате аттача для ВК
         links = ''
