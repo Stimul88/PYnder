@@ -75,10 +75,15 @@ for event in longpoll.listen():
                         all_buttons(my_id, user_text, user_photo)
                         # continue
                     case 'добавить в избранное':
-                        if not (my_pynder.add_favorite(my_data[index], str(my_id))):
+                        if my_pynder.add_favorite(my_data[index], str(my_id)):
+                            sender(my_id, 'Добавлено.\n')
+                        else:
                             sender(my_id, 'Уже добавлено.\n')
                     case 'удалить из избранного':
-                        pass
+                        if my_pynder.delete_favorite(my_data[index]['vk_id'], str(my_id)):
+                            sender(my_id, 'Удалено.\n')
+                        else:
+                            sender(my_id, 'Не найдено.\n')
                     case 'просмотреть избранное':
                         pass
                     case _:

@@ -190,9 +190,9 @@ class PYnder_DB:
             if my_query.count() == 0:
                 db.query(m.Photo).filter_by(user_id=user_pk_).delete()
                 db.commit()
-                db.query(m.VKUser).filter_by(vk_id=user_pk_).delete()
+                db.query(m.VKUser).filter_by(id=user_pk_).delete()
                 db.commit()
-            return True
+                return True
 
     def create_structure(self):
         """
