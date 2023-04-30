@@ -31,16 +31,19 @@ def sender(id_, text):
 
 
 # логика бота
-
+first_run = True
 index = 0
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW:
 
         try:
             if event.to_me:
-                my_id = event.user_id
-                vk_search = Vk(my_id)
-                data_ = vk_search.get_final_data()
+                if first_run:
+                    first_run = False
+                    my_id = event.user_id
+                    vk_search = Vk(my_id)
+                    my_data = vk_search.get_final_data()
+                    print(len(my_data))
                 msg = event.text.lower()
                 my_msg = event.message
 
@@ -48,8 +51,8 @@ for event in longpoll.listen():
                     case 'старт':
                         sender(my_id, 'Секунду, ищу варианты для тебя')
                         my_pynder.add_owner(str(my_id))
-                        data_ = vk_search.get_final_data()
-                        user_text, user_photo = vk_search.search_favorite(index, data_)
+                        my_data = vk_search.get_final_data()
+                        user_text, user_photo = vk_search.search_favorite(index, my_data)
                         all_buttons(my_id, user_text, user_photo)
                         # continue
                     case 'назад':
@@ -58,19 +61,21 @@ for event in longpoll.listen():
                         else:
                             index -= 1
                             print(index)
-                            user_text, user_photo = vk_search.search_favorite(index, data_)
+                            user_text, user_photo = vk_search.search_favorite(index, my_data)
                             all_buttons(my_id, user_text, user_photo)
                             # continue
                     case 'дальше':
-                        if index == len(data_):
+                        if index == len(my_data)-1:
+                            # Тима, наверное здесь стоит сделать запрос новых записей если можно вытащить не первые 10,
+                            # например, а вторые 10, потом третьи и т.д. (Саша)
                             sender(my_id, 'Это последняя запись, выбирай из того что есть.\n')
                         index += 1
                         print(index)
-                        user_text, user_photo = vk_search.search_favorite(index, data_)
+                        user_text, user_photo = vk_search.search_favorite(index, my_data)
                         all_buttons(my_id, user_text, user_photo)
                         # continue
                     case 'добавить в избранное':
-                        pass
+                        my_pynder.add_favorite(my_data[index], my_id)
                     case 'удалить из избранного':
                         pass
                     case 'просмотреть избранное':
