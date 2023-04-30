@@ -97,15 +97,14 @@ class Vk:
         data = []
         search_result = self.search_peoples()
         for people in search_result:
-            city = people['city']['title']
-
             data.append({
                 'first_name': people['first_name'],
                 'last_name': people['last_name'],
                 'vk_id': str(people['id']),
                 'birth_date': people['bdate'],
                 'sex': people['sex'],
-                'city': city
+                'city': people['city']['title'],
+                'url': f'https://vk.ru/id{str(people["id"])}'
             })
         return data
 

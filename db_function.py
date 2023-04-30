@@ -254,8 +254,8 @@ class PYnder_DB:
                     last_name=new_record["last_name"],
                     city=new_record["city"],
                     sex=new_record["sex"],
-                    # birth_date=new_record["birth_date"],
-                    # url=new_record["url"]
+                    birth_date=new_record["birth_date"],
+                    url=new_record["url"]
                 )
                 db.add(my_record)
                 db.commit()
@@ -285,6 +285,8 @@ class PYnder_DB:
                 my_record = m.Favorite(user_id=user_pk_, owner_id=owner_pk_)
                 db.add(my_record)
                 db.commit()
+                return True
+            return False
 
     def import_test_data(self):
         owner_id = "owner_1"
