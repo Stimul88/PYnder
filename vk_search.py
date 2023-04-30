@@ -3,6 +3,7 @@ from fake_headers import Headers
 from functions import current_age, sort_photo_by_likes
 from secondary_token import secondary_token
 
+
 class Vk:
 
     def __init__(self, vk_id: str, version='5.131'):
@@ -14,14 +15,14 @@ class Vk:
         self.vk_id = vk_id
         self.search_index = 0
 
-
     def get_city_id(self, city: str):
 
         '''когда у пользователя скрыт город, получаем id города из названия для вк апи'''
         try:
             params = {'country_id': 1, 'q': city, 'count': 1}
-            response = requests.get(self.url + 'database.getCities', headers=self.headers, params={**self.params, **params}).json()
-            return response['response']['items'][0]['id']
+            # response = requests.get(self.url + 'database.getCities', headers=self.headers, params={**self.params, **params}).json()
+            # return response['response']['items'][0]['id']
+            return 1
         except:
             pass
 
@@ -32,14 +33,17 @@ class Vk:
         params = {'user_ids': self.vk_id, 'fields': 'bdate, city, sex'}
         response = requests.get(self.url + 'users.get', headers=self.headers, params={**self.params, **params}).json()
         try:
-            user_age = current_age(response['response'][0]['bdate'])
+            user_age = 30
+            # user_age = current_age(response['response'][0]['bdate'])
         except:
-            user_age = 30 #сюда подставить возраст который напишет в вк сообщение
+            user_age = 30  # сюда подставить возраст который напишет в вк сообщение
 
         try:
-            user_city = response['response'][0]['city']['id']
+            user_city = 1
+            # user_city = response['response'][0]['city']['id']
         except:
-            user_city = self.get_city_id(city) #сюда подставляем город в котором ищет если не указан
+            # user_city = self.get_city_id(city) #сюда подставляем город в котором ищет если не указан
+            user_city = 1
         if response['response'][0]['sex'] == 2:
             sex_for_search = 1
         else:
@@ -51,12 +55,11 @@ class Vk:
             'sex': sex_for_search,
             'is_closed': False,
             'has_photo': 3,
-            'count': 100,
+            'count': 3,
             'fields[]': ['city', 'sex', 'domain', 'bdate']
-            }
+        }
 
         return search_params
-
 
     def search_peoples(self):
 
@@ -93,7 +96,6 @@ class Vk:
         data = []
         search_result = self.search_peoples()
         for people in search_result:
-
             city = people['city']['title']
 
             data.append({
@@ -103,7 +105,7 @@ class Vk:
                 'birth_date': people['bdate'],
                 'sex': people['sex'],
                 'city': city
-                         })
+            })
         return data
 
     def get_final_data(self, album_id='profile'):
@@ -121,14 +123,14 @@ class Vk:
             photos = []
             try:
                 for photo in response['response']['items']:
-                    for size in photo['sizes']:
-                        if 'w' in size['type'] or 'z' in size['type'] or 'y' in size['type'] or 'r' in size['type'] \
-                                or 'q' in size['type'] or 'p' in size['type']:
-                            current_likes = photo['likes']['count']
-                            link = size['url']
-                            result = {'url': link, 'likes': current_likes}
-                            photos.append(result)
-                            break
+                    # for size in photo['sizes']:
+                    #     if 'w' in size['type'] or 'z' in size['type'] or 'y' in size['type'] or 'r' in size['type'] \
+                    #             or 'q' in size['type'] or 'p' in size['type']:
+                    current_likes = photo['likes']['count']
+                    link = photo['id']
+                    result = {'url': link, 'likes': current_likes}
+                    photos.append(result)
+                    # break
 
                 person['images'] = sort_photo_by_likes(photos)
                 final_data.append(person)
@@ -136,10 +138,18 @@ class Vk:
                 pass
 
         return final_data
-    def search_favorite(self, search_index, data):
-        links = ''
-        for photo in data[search_index]['images']:
-            links += (photo['url'] + '\n')
-        return f'{data[search_index]["first_name"]} {data[search_index]["last_name"]} \n' \
-              f'https://vk.ru/id{data[search_index]["vk_id"]} \n{links}'
 
+    def search_favorite(self, search_index, data_, access_token_):
+        # (Саша) Тима, я переписал вывод, отдельно возвращаю параметры найденной записи,
+        # отдельно картинки в формате аттача для ВК
+        links = ''
+        for photo in data_[search_index]['images']:
+            links += f'photo{data_[search_index]["vk_id"]}_{photo["url"]},'
+        user_page_url = f'https://vk.ru/id{data_[search_index]["vk_id"]}'
+        final_output = \
+            f"Имя: {data_[search_index]['first_name']},\n " \
+            f"Фамилия: {data_[search_index]['last_name']},\n " \
+            f"Дата рождения: {data_[search_index]['birth_date']},\n" \
+            f"Город: {data_[search_index]['city']},\n" \
+            f"Страница: {user_page_url},\n"
+        return final_output, links
