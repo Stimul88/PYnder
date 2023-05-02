@@ -10,8 +10,5 @@ def current_age(bday):
 
 
 def sort_photo_by_likes(photos: list):
-    sorted_list = sorted(photos, key=lambda x: x['likes'], reverse=True)
+    sorted_list = sorted(photos, key=lambda x: x["likes"], reverse=True)
     return sorted_list[:3]
-
-
-

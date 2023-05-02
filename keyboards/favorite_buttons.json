@@ -1,0 +1,33 @@
+{
+  "one_time": false,
+  "buttons": [
+    [{
+      "action": {
+        "type": "text",
+        "label": "Предыдущий"
+      },
+      "color": "primary"
+    },
+      {
+      "action": {
+        "type": "text",
+        "label": "Следующий"
+      },
+      "color": "primary"
+    }],
+    [{
+        "action": {
+          "type": "text",
+          "label": "Вернуться в поиск"
+        },
+        "color": "positive"
+      },
+      {
+        "action": {
+          "type": "text",
+          "label": "Удалить из Избранного"
+        },
+        "color": "negative"
+      }]
+  ]
+}

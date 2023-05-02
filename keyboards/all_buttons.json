@@ -27,7 +27,7 @@
           "type": "text",
           "label": "Удалить из избранного"
         },
-        "color": "positive"
+        "color": "negative"
       }
     ],
     [{
@@ -36,6 +36,13 @@
           "label": "Просмотреть избранное"
         },
         "color": "negative"
+      },
+    {
+        "action": {
+          "type": "text",
+          "label": "Закончить поиск"
+        },
+        "color": "secondary"
       }]
   ]
 }

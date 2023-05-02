@@ -1,0 +1,34 @@
+{
+  "one_time": false,
+  "buttons": [
+    [{
+      "action": {
+        "type": "text",
+        "label": "Задать минимальный возраст"
+      },
+      "color": "primary"
+    },
+    {
+      "action": {
+        "type": "text",
+        "label": "Задать максимальный возраст"
+    },
+      "color": "primary"
+    }],
+      [{
+      "action": {
+        "type": "text",
+        "label": "Задать город"
+      },
+      "color": "primary"
+    },
+    {
+      "action": {
+        "type": "text",
+        "label": "Назад"
+    },
+    "color": "primary"
+    }]
+    
+  ]
+}

@@ -4,7 +4,14 @@
     [{
         "action": {
           "type": "text",
-          "label": "Старт"
+          "label": "Старт\uD83D\uDE80"
+        },
+        "color": "secondary"
+      },
+      {
+        "action": {
+          "type": "text",
+          "label": "Настройки поиска"
         },
         "color": "secondary"
       }]

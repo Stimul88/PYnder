@@ -5,7 +5,7 @@ import sqlalchemy as sq
 from sqlalchemy.orm import sessionmaker
 
 
-def get_db_config(ini_file: str = "db.ini") -> str:
+def get_db_config(ini_file: str = "config.ini") -> str:
     """
     Function reads from ini file following parameters from section [DataBase]:\n
     IP = IP address where DB is running in general format, e.g. 127.0.0.1\n
@@ -13,7 +13,7 @@ def get_db_config(ini_file: str = "db.ini") -> str:
     DBName = database name\n
     User = username\n
     Password = password\n
-    :param ini_file: .ini filename with path if necessary, by default - db.ini\n
+    :param ini_file: .ini filename with path if necessary, by default - config.ini\n
     :return: DSN string for sqlalchemy engine creation:\n
     postgresql://{db_user}:{db_pwd}@{db_ip}:{db_port}/{db_name}\n
     """
@@ -39,13 +39,12 @@ def get_db_config(ini_file: str = "db.ini") -> str:
 
 class PYnder_DB:
     def __init__(self, rebuild: bool):
-        self.engine = sq.create_engine(get_db_config("db.ini"))
+        self.engine = sq.create_engine(get_db_config("config.ini"))
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
         if rebuild:
             self.delete_structure()
             self.create_structure()
-            # self.import_test_data()
 
     def get_favorite(self, vk_owner_id_: str) -> list:
         """
@@ -91,12 +90,12 @@ class PYnder_DB:
                 if f_vkid not in vk_ids:
                     vk_ids.append(f_vkid)
                     favorite_dict["vk_id"] = element[1]
-                    favorite_dict["f_name"] = element[2]
-                    favorite_dict["l_name"] = element[3]
+                    favorite_dict["first_name"] = element[2]
+                    favorite_dict["last_name"] = element[3]
                     favorite_dict["city"] = element[4]
                     favorite_dict["sex"] = element[5]
                     favorite_dict[
-                        "b_date"
+                        "birth_date"
                     ] = f"{element[6].day}.{element[6].month}.{element[6].year}"
                     favorite_dict["url"] = element[7]
                     favorite_dict["images"] = [{"url": element[8], "likes": element[9]}]
@@ -255,7 +254,7 @@ class PYnder_DB:
                     city=new_record["city"],
                     sex=new_record["sex"],
                     birth_date=new_record["birth_date"],
-                    url=new_record["url"]
+                    url=new_record["url"],
                 )
                 db.add(my_record)
                 db.commit()
