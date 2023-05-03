@@ -62,7 +62,7 @@ class Vk:
                     "sex": sex_for_search,
                     "is_closed": False,
                     "has_photo": 1,
-                    "count": 50,
+                    "count": 200,
                     "fields[]": ["city", "sex", "domain", "bdate"],
                 }
 
