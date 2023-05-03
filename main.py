@@ -179,6 +179,7 @@ def delete_favorite_button(
     Отработка нажатия на кнопку "Удалить из избранного" в меню поиска или Избранном.
     Принимает на вход результаты поиска и индекс текущей записи, список Избранного, индекс текущей записи в Избранном
     Параметр mode_ определяет в каком режиме была вызвана функция: 1 - режим поиска, 2 - режим Избранного
+    Возвращает, в зависимости от режима соответствующий список и индекс
     :param user_id:
     :param data_m:
     :param index_m:
@@ -215,6 +216,11 @@ def delete_favorite_button(
                 favorite_buttons(user_id, f_user_text, f_user_photo)
     else:
         sender(user_id, "Не найдено в Избранном.\n")
+
+    if mode == 1:
+        return data_m, index_m
+    else:
+        return data_f, index_f
 
 
 def view_favorite_button(user_id: int, data_f: list):
@@ -434,9 +440,15 @@ while True:
         case "добавить в избранное":
             add_favorite_button(my_user_id, my_data, main_index)
         case "удалить из избранного":
-            delete_favorite_button(
+            temp_data, temp_index = delete_favorite_button(
                 my_user_id, my_data, main_index, favorite_data, favorite_index, mode
             )
+            if mode == 1:
+                my_data = temp_data
+                main_index = temp_index
+            else:
+                favorite_data = temp_data
+                favorite_index = temp_index
         case "просмотреть избранное":
             favorite_data = my_pynder.get_favorite(str(my_user_id))
             mode = 2
