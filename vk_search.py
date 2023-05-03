@@ -18,8 +18,11 @@ class Vk:
         self.vk_id = vk_id
 
     def get_city_id(self, city: str):
-        # (Саша) временно закоментировал выбор города, возвращаю константу 1
-        """когда у пользователя скрыт город, получаем id города из названия для вк апи"""
+        """
+        когда у пользователя скрыт город, получаем id города из названия для вк апи
+        :param city:
+        :return:
+        """
         try:
             params = {"country_id": 1, "q": city, "count": 1}
             response = requests.get(
@@ -32,8 +35,12 @@ class Vk:
             pass
 
     def get_params_for_search(self, args=False, **kwargs):
-        """получаем параметры для поиска с помощью id пользователя который пишет, если их нет, просим задать вручную"""
-
+        """
+        получаем параметры для поиска с помощью id пользователя который пишет, если их нет, просим задать вручную
+        :param args:
+        :param kwargs:
+        :return:
+        """
         params = {"user_ids": self.vk_id, "fields": "bdate, city, sex"}
         response = requests.get(
             self.url + "users.get",
@@ -74,8 +81,13 @@ class Vk:
             return search_params
 
     def search_peoples(self, args=False, **kwargs):
-        """ищем людей по поиску ВК, задается возраст от и до, города задаются айдишниками 1- москва, 2-питер и тд
-        пол 1-Ж 2-М, возвращаем максимумум 1000 найденных пользователей"""
+        """
+        ищем людей по поиску ВК, задается возраст от и до, города задаются айдишниками 1- москва, 2-питер и тд
+        пол 1-Ж 2-М, возвращаем максимумум 1000 найденных пользователей
+        :param args:
+        :param kwargs:
+        :return:
+        """
 
         if not args:
             search_params = self.get_params_for_search()
@@ -110,7 +122,12 @@ class Vk:
         return result
 
     def create_data(self, args=False, **kwargs):
-        """фильтруем полученную ранее информацию, на вход все те же переменные, сохраняем нужные данные в data"""
+        """
+        фильтруем полученную ранее информацию, на вход все те же переменные, сохраняем нужные данные в data
+        :param args:
+        :param kwargs:
+        :return:
+        """
 
         data = []
         if not args:
@@ -132,8 +149,15 @@ class Vk:
         return data
 
     def get_final_data(self, album_id="profile", args=False, **kwargs):
-        """на вход подаем уже отфильрованную инфу, пробегаемся по айдишникам, отсеиваем закрытые страницы,
-        берем только адекватные фото"""
+        """
+        на вход подаем уже отфильрованную инфу, пробегаемся по айдишникам, отсеиваем закрытые страницы,
+        берем только адекватные фото
+
+        :param album_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         if not args:
             peoples = self.create_data()
         else:
@@ -165,6 +189,12 @@ class Vk:
         return final_data
 
     def search_favorite(self, search_index, data_):
+        """
+        Первичное преобразование данных для обработки
+        :param search_index:
+        :param data_:
+        :return:
+        """
         links = ""
         for photo in data_[search_index]["images"]:
             links += f'photo{data_[search_index]["vk_id"]}_{photo["url"]},'
