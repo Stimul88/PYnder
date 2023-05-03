@@ -4,30 +4,30 @@
     [{
       "action": {
         "type": "text",
-        "label": "Задать минимальный возраст"
+        "label": "Задать min возраст"
       },
       "color": "primary"
     },
     {
       "action": {
         "type": "text",
-        "label": "Задать максимальный возраст"
+        "label": "Задать max возраст"
     },
       "color": "primary"
     }],
       [{
       "action": {
         "type": "text",
-        "label": "Задать город"
+        "label": "Задать город\uD83C\uDFE4"
       },
-      "color": "primary"
+      "color": "negative"
     },
     {
       "action": {
         "type": "text",
         "label": "Назад"
     },
-    "color": "primary"
+    "color": "positive"
     }]
     
   ]

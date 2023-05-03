@@ -324,7 +324,7 @@ def search_configure_button(user_id: int) -> dict:
     while True:
         config_msg = get_user_choice(user_id)
         match config_msg:
-            case "задать минимальный возраст":
+            case "задать min возраст":
                 result = get_user_choice(user_id)
                 if result.isdecimal():
                     my_min_age = int(result)
@@ -336,7 +336,7 @@ def search_configure_button(user_id: int) -> dict:
                         user_id,
                         "Неверный ввод, нажмите 'Задать минимальный возраст' снова.",
                     )
-            case "задать максимальный возраст":
+            case "задать max возраст":
                 result = get_user_choice(user_id)
                 if result.isdecimal():
                     my_max_age = int(result)
@@ -345,7 +345,7 @@ def search_configure_button(user_id: int) -> dict:
                         user_id,
                         "Неверный ввод, нажмите 'Задать максимальный возраст' снова.",
                     )
-            case "задать город":
+            case "задать город🏤":
                 my_city = get_user_choice(user_id)
                 if not my_city:
                     sender(user_id, "Неверный ввод, нажмите 'Задать город' снова.")
@@ -427,9 +427,9 @@ while True:
                 mode = 1
             except:
                 pass
-        case "назад":
+        case "👈назад":
             main_index = search_back_button(my_user_id, my_data, main_index)
-        case "дальше":
+        case "дальше👉":
             main_index = search_forward_button(my_user_id, my_data, main_index)
         case "добавить в избранное":
             add_favorite_button(my_user_id, my_data, main_index)
@@ -452,7 +452,7 @@ while True:
             favorite_index = favorite_back_button(
                 my_user_id, favorite_data, favorite_index
             )
-        case "закончить поиск":
+        case "закончить поиск🚫":
             finish_search_button(my_user_id)
-        case "настройки поиска":
+        case "настройки поиска🛠":
             search_dict = search_configure_button(my_user_id)

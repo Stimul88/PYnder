@@ -4,14 +4,14 @@
     [{
       "action": {
         "type": "text",
-        "label": "Назад"
+        "label": "\uD83D\uDC48Назад"
       },
       "color": "primary"
     },
       {
       "action": {
         "type": "text",
-        "label": "Дальше"
+        "label": "Дальше\uD83D\uDC49"
       },
       "color": "primary"
     }],
@@ -40,7 +40,7 @@
     {
         "action": {
           "type": "text",
-          "label": "Закончить поиск"
+          "label": "Закончить поиск\uD83D\uDEAB"
         },
         "color": "secondary"
       }]

@@ -11,7 +11,7 @@
       {
         "action": {
           "type": "text",
-          "label": "Настройки поиска"
+          "label": "Настройки поиска\uD83D\uDEE0"
         },
         "color": "secondary"
       }]
