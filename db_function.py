@@ -7,15 +7,10 @@ from sqlalchemy.orm import sessionmaker
 
 def get_db_config(ini_file: str = "config.ini") -> str:
     """
-    Function reads from ini file following parameters from section [DataBase]:\n
-    IP = IP address where DB is running in general format, e.g. 127.0.0.1\n
-    Port = database port, e.g. 5432\n
-    DBName = database name\n
-    User = username\n
-    Password = password\n
-    :param ini_file: .ini filename with path if necessary, by default - config.ini\n
-    :return: DSN string for sqlalchemy engine creation:\n
-    postgresql://{db_user}:{db_pwd}@{db_ip}:{db_port}/{db_name}\n
+    Функция читает из конфигурационного файла, по умолчанию config.ini
+    :param ini_file: .ini filename with path if necessary, by default - config.ini
+    :return: DSN string for sqlalchemy engine creation:
+    postgresql://{db_user}:{db_pwd}@{db_ip}:{db_port}/{db_name}
     """
 
     if not os.path.exists(ini_file):
@@ -48,7 +43,7 @@ class PYnder_DB:
 
     def get_favorite(self, vk_owner_id_: str) -> list:
         """
-        Method returns the favorites list for the mentioned owner
+        Метод возвращает список избранного
         :param vk_owner_id_: str Owner's VK ID
         :return: list of dicts {
             vk_id:str(50),
@@ -112,7 +107,7 @@ class PYnder_DB:
 
     def get_pk(self, table_, id_: str) -> int:
         """
-        Method searches for a PK in mentioned table_ using id_
+        Метод возвращает primary key для определенного VK ID
         :param table_ table object with parameter, e.g. m.VKUser.id
         :param id_: VK ID:
         :return: PK ID or -1 if not found
@@ -127,7 +122,7 @@ class PYnder_DB:
 
     def is_in_favorite(self, vk_user_id_: str, vk_owner_id_: str) -> bool:
         """
-        Method checks is there a VK User in Owner's Favorites
+        Метод проверяет наличие пользователя ВК в избранном
         :param vk_user_id_: User's VK ID
         :param vk_owner_id_: Owner's VK ID
         :return: True if in Favorites, False otherwise
@@ -155,8 +150,8 @@ class PYnder_DB:
 
     def delete_favorite(self, vk_user_id_: str, vk_owner_id_: str) -> bool:
         """
-        Method removes record from favorites. If VK Usr is not belong to another Owner - remove from VKUsers and
-        Photos as well
+        Метод удаляет запись из избранного. Если аккаунт ВК не находится в избранном у других пользователей бота,
+        он удаляется вместе с картинками
         :param vk_user_id_: str(50) - VK User ID to be removed
         :param vk_owner_id_: str(50) - Owner's VK ID
         """
@@ -195,7 +190,7 @@ class PYnder_DB:
 
     def create_structure(self):
         """
-        Method creates table structure described in models.py\n
+        Метод создает структуру БД
         :return: None\n
         """
 
@@ -204,7 +199,7 @@ class PYnder_DB:
 
     def delete_structure(self):
         """
-        Method deletes all current structure along with the data\n
+        Метод удаляет БД - данные и структуру
         :return: None\n
         """
 
@@ -213,7 +208,7 @@ class PYnder_DB:
 
     def add_owner(self, owner_id_: str) -> bool:
         """
-        Method uploads record to the database\n
+        Метод добавляет пользователя в БД
         :param owner_id_: str(50) - owner ID
         :return: boolean - True if record was uploaded, False if not (already exists)
         """
@@ -228,7 +223,7 @@ class PYnder_DB:
 
     def add_favorite(self, new_record: dict, vk_owner_id_: str) -> bool:
         """
-        Method adds record to favorites. Makes entry in Favorites, VKUsers and Photos tables
+        Метод добавляет запись в избранное, таблицы VKUsers и Photos
         :param new_record: dictionary{
             vk_id:str(50),
             first_name:str(20),
@@ -286,112 +281,3 @@ class PYnder_DB:
                 db.commit()
                 return True
             return False
-
-    def import_test_data(self):
-        owner_id = "owner_1"
-        self.add_owner(owner_id)
-        vk_user_dict = {
-            "vk_id": "user_1",
-            "first_name": "Test",
-            "last_name": "User",
-            "city": "Москва",
-            "sex": 1,
-            "birth_date": "30.06.1979",
-            "url": "https://vk.com/781362360",
-            "images": [
-                {"url": "image11.jpg", "likes": 12},
-                {"url": "image12.jpg", "likes": 212},
-                {"url": "image13.jpg", "likes": 132},
-            ],
-        }
-        self.add_favorite(vk_user_dict, owner_id)
-
-        owner_id = "owner_1"
-        self.add_owner(owner_id)
-        vk_user_dict = {
-            "vk_id": "user_2",
-            "first_name": "Test_2",
-            "last_name": "User_2",
-            "city": "Москва",
-            "sex": 2,
-            "birth_date": "30.06.1979",
-            "url": "https://vk.com/781362360",
-            "images": [
-                {"url": "image11.jpg", "likes": 12},
-                {"url": "image12.jpg", "likes": 212},
-                {"url": "image13.jpg", "likes": 132},
-            ],
-        }
-        self.add_favorite(vk_user_dict, owner_id)
-
-        owner_id = "owner_2"
-        self.add_owner(owner_id)
-        vk_user_dict = {
-            "vk_id": "user_1",
-            "first_name": "Test",
-            "last_name": "User",
-            "city": "Москва",
-            "sex": 1,
-            "birth_date": "30.06.1979",
-            "url": "https://vk.com/781362360",
-            "images": [
-                {"url": "image21.jpg", "likes": 12},
-                {"url": "image22.jpg", "likes": 12},
-                {"url": "image23.jpg", "likes": 12},
-            ],
-        }
-        self.add_favorite(vk_user_dict, owner_id)
-
-        owner_id = "owner_3"
-        self.add_owner(owner_id)
-        vk_user_dict = {
-            "vk_id": "user_2",
-            "first_name": "Test_2",
-            "last_name": "User_2",
-            "city": "Toronto",
-            "sex": 2,
-            "birth_date": "30.06.1979",
-            "url": "https://vk.com/a123",
-            "images": [
-                {"url": "image31.jpg", "likes": 12},
-                {"url": "image32.jpg", "likes": 12},
-                {"url": "image33.jpg", "likes": 12},
-            ],
-        }
-        self.add_favorite(vk_user_dict, owner_id)
-
-        owner_id = "owner_4"
-        self.add_owner(owner_id)
-        vk_user_dict = {
-            "vk_id": "user_3",
-            "first_name": "Test",
-            "last_name": "User",
-            "city": "Москва",
-            "sex": 1,
-            "birth_date": "30.06.1979",
-            "url": "https://vk.com/781362360",
-            "images": [
-                {"url": "image41.jpg", "likes": 12},
-                {"url": "image42.jpg", "likes": 12},
-                {"url": "image43.jpg", "likes": 12},
-            ],
-        }
-        self.add_favorite(vk_user_dict, owner_id)
-
-        owner_id = "owner_5"
-        self.add_owner(owner_id)
-        vk_user_dict = {
-            "vk_id": "user_4",
-            "first_name": "Test",
-            "last_name": "User",
-            "city": "Washington",
-            "sex": 2,
-            "birth_date": "30.06.1979",
-            "url": "https://vk.com/222",
-            "images": [
-                {"url": "image51.jpg", "likes": 12},
-                {"url": "image52.jpg", "likes": 12},
-                {"url": "image53.jpg", "likes": 12},
-            ],
-        }
-        self.add_favorite(vk_user_dict, owner_id)

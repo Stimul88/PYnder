@@ -27,11 +27,11 @@ class Vk:
                 headers=self.headers,
                 params={**self.params, **params},
             ).json()
-            return response['response']['items'][0]['id']
+            return response["response"]["items"][0]["id"]
         except:
             pass
 
-    def get_params_for_search(self, args=False, **kwargs ):
+    def get_params_for_search(self, args=False, **kwargs):
         """получаем параметры для поиска с помощью id пользователя который пишет, если их нет, просим задать вручную"""
 
         params = {"user_ids": self.vk_id, "fields": "bdate, city, sex"}
@@ -61,18 +61,17 @@ class Vk:
 
                 return search_params
             except:
-                'pass'
+                "pass"
         else:
-            search_params = {**kwargs,
+            search_params = {
+                **kwargs,
                 "sex": sex_for_search,
                 "is_closed": False,
                 "has_photo": 1,
                 "count": 200,
-                "fields[]": ["city", "sex", "domain", "bdate"]}
+                "fields[]": ["city", "sex", "domain", "bdate"],
+            }
             return search_params
-
-
-
 
     def search_peoples(self, args=False, **kwargs):
         """ищем людей по поиску ВК, задается возраст от и до, города задаются айдишниками 1- москва, 2-питер и тд
@@ -97,7 +96,7 @@ class Vk:
                 elif people["is_closed"]:
                     continue
                 try:
-                    if current_age(people['bdate']) < 18:
+                    if current_age(people["bdate"]) < 18:
                         continue
                 except:
                     pass

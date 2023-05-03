@@ -97,14 +97,18 @@ def start_button(user_id: int, index_m: int) -> list:
         try:
             data_m = vk_search.get_final_data()
         except:
-            sender(user_id, 'Данные в твоем профиле скрыты, пожалуйста заполни условия поиска, нажми на кнопку')
+            sender(
+                user_id,
+                "Данные в твоем профиле скрыты, пожалуйста заполни условия поиска, нажми на кнопку",
+            )
     else:
         data_m = vk_search.get_final_data(args=True, **search_dict)
 
-
     if len(data_m) == 0:
-        sender(user_id, "Ничего не найдено.\n "
-                            "Попробуй задать другие параметры поиска.\n")
+        sender(
+            user_id,
+            "Ничего не найдено.\n " "Попробуй задать другие параметры поиска.\n",
+        )
         return None
     sender(user_id, f"Найдено вариантов: {len(data_m)}.")
     user_text, user_photo = vk_search.search_favorite(index_m, data_m)
@@ -168,7 +172,9 @@ def add_favorite_button(user_id: int, data_m: list, index_m: int):
         sender(user_id, "Уже добавлено.\n")
 
 
-def delete_favorite_button(user_id: int, data_m: list, index_m: int, data_f: list, index_f: int, mode_: int):
+def delete_favorite_button(
+    user_id: int, data_m: list, index_m: int, data_f: list, index_f: int, mode_: int
+):
     """
     Отработка нажатия на кнопку "Удалить из избранного" в меню поиска или Избранном.
     Принимает на вход результаты поиска и индекс текущей записи, список Избранного, индекс текущей записи в Избранном
@@ -328,7 +334,7 @@ def search_configure_button(user_id: int) -> dict:
                 else:
                     sender(
                         user_id,
-                        "Неверный ввод, нажмите 'Задать минимальный возраст' снова."
+                        "Неверный ввод, нажмите 'Задать минимальный возраст' снова.",
                     )
             case "задать максимальный возраст":
                 result = get_user_choice(user_id)
@@ -337,15 +343,12 @@ def search_configure_button(user_id: int) -> dict:
                 else:
                     sender(
                         user_id,
-                        "Неверный ввод, нажмите 'Задать максимальный возраст' снова."
+                        "Неверный ввод, нажмите 'Задать максимальный возраст' снова.",
                     )
             case "задать город":
                 my_city = get_user_choice(user_id)
                 if not my_city:
-                    sender(
-                        user_id,
-                        "Неверный ввод, нажмите 'Задать город' снова."
-                    )
+                    sender(user_id, "Неверный ввод, нажмите 'Задать город' снова.")
             case "назад":
                 if my_min_age < 1:
                     sender(user_id, "Задайте минимальный возраст.")
@@ -390,6 +393,8 @@ def get_user_choice(user_id: int) -> str:
                 print(ex)
 
 
+# if __name__ != __main__:
+#     exit()
 config = configparser.ConfigParser()  # создаём объекта парсера
 config.read("config.ini")
 my_pynder = dbf.PYnder_DB(rebuild=True)
@@ -409,6 +414,8 @@ first_keyboards(
 
 search_dict, main_index, favorite_index, mode = 0, 0, 0, 0
 favorite_data = {}
+
+# Логика общения с пользователем
 while True:
     my_message = get_user_choice(my_user_id)
     match my_message:
@@ -449,4 +456,3 @@ while True:
             finish_search_button(my_user_id)
         case "настройки поиска":
             search_dict = search_configure_button(my_user_id)
-
