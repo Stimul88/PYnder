@@ -393,8 +393,8 @@ def get_user_choice(user_id: int) -> str:
                 print(ex)
 
 
-# if __name__ != __main__:
-#     exit()
+if __name__ != "__main__":
+    exit()
 config = configparser.ConfigParser()  # создаём объекта парсера
 config.read("config.ini")
 my_pynder = dbf.PYnder_DB(rebuild=True)
