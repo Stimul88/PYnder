@@ -17,20 +17,6 @@ class Vk:
         self.headers = Headers(os="win", browser="chrome").generate()
         self.vk_id = vk_id
 
-    def check_user_acc(self, user_id):
-        params = {"user_ids": user_id, "fields": "city, bdate"}
-        response = requests.get(
-            self.url + "users.get",
-            params={**self.params, **params},
-            headers=self.headers,
-        ).json()
-        if (
-            response["response"][0]["is_closed"]
-            or not response["response"][0]["bdate"]
-            or not response["response"][0]["city"]
-        ):
-            return True
-
     def get_city_id(self, city: str):
         # (Саша) временно закоментировал выбор города, возвращаю константу 1
         """когда у пользователя скрыт город, получаем id города из названия для вк апи"""
@@ -45,7 +31,7 @@ class Vk:
         except:
             pass
 
-    def get_params_for_search(self, city=None, age=None):
+    def get_params_for_search(self, args=False, **kwargs ):
         """получаем параметры для поиска с помощью id пользователя который пишет, если их нет, просим задать вручную"""
 
         params = {"user_ids": self.vk_id, "fields": "bdate, city, sex"}
@@ -54,39 +40,48 @@ class Vk:
             headers=self.headers,
             params={**self.params, **params},
         ).json()
-        try:
-            user_age = current_age(response["response"][0]["bdate"])
-
-        except:
-            user_age = age  # сюда подставить возраст который напишет в вк сообщение
-
-        if not city:
-            user_city = response["response"][0]["city"]["id"]
-        else:
-            user_city = self.get_city_id(
-                city
-            )  # сюда подставляем город в котором ищет если не указан
         if response["response"][0]["sex"] == 2:
             sex_for_search = 1
         else:
             sex_for_search = 2
-        search_params = {
-            "age_from": user_age - 5,
-            "age_to": user_age + 5,
-            "city_id": user_city,
-            "sex": sex_for_search,
-            "is_closed": False,
-            "has_photo": 1,
-            "count": 200,
-            "fields[]": ["city", "sex", "domain", "bdate"],
-        }
-        return search_params
+        if not args:
+            try:
+                user_age = current_age(response["response"][0]["bdate"])
+                user_city = response["response"][0]["city"]["id"]
+                search_params = {
+                    "age_from": user_age - 5,
+                    "age_to": user_age + 5,
+                    "city_id": user_city,
+                    "sex": sex_for_search,
+                    "is_closed": False,
+                    "has_photo": 1,
+                    "count": 200,
+                    "fields[]": ["city", "sex", "domain", "bdate"],
+                }
 
-    def search_peoples(self, city=None, age=None):
+                return search_params
+            except:
+                'pass'
+        else:
+            search_params = {**kwargs,
+                "sex": sex_for_search,
+                "is_closed": False,
+                "has_photo": 1,
+                "count": 200,
+                "fields[]": ["city", "sex", "domain", "bdate"]}
+            return search_params
+
+
+
+
+    def search_peoples(self, args=False, **kwargs):
         """ищем людей по поиску ВК, задается возраст от и до, города задаются айдишниками 1- москва, 2-питер и тд
         пол 1-Ж 2-М, возвращаем максимумум 1000 найденных пользователей"""
 
-        search_params = self.get_params_for_search(city, age)
+        if not args:
+            search_params = self.get_params_for_search()
+        else:
+            search_params = self.get_params_for_search(args=True, **kwargs)
 
         response = requests.get(
             self.url + "users.search",
@@ -94,7 +89,6 @@ class Vk:
             headers=self.headers,
         ).json()
         result = []
-
         for people in response["response"]["items"]:
             try:
                 if people["city"]["id"] != search_params["city_id"]:
@@ -102,9 +96,11 @@ class Vk:
 
                 elif people["is_closed"]:
                     continue
-
-                # elif current_age(people['bdate']) < 18:
-                #     continue
+                try:
+                    if current_age(people['bdate']) < 18:
+                        continue
+                except:
+                    pass
 
                 else:
                     result.append(people)
@@ -114,11 +110,14 @@ class Vk:
                 continue
         return result
 
-    def create_data(self, city=None, age=None):
+    def create_data(self, args=False, **kwargs):
         """фильтруем полученную ранее информацию, на вход все те же переменные, сохраняем нужные данные в data"""
 
         data = []
-        search_result = self.search_peoples(city, age)
+        if not args:
+            search_result = self.search_peoples()
+        else:
+            search_result = self.search_peoples(args=True, **kwargs)
         for people in search_result:
             data.append(
                 {
@@ -133,11 +132,13 @@ class Vk:
             )
         return data
 
-    def get_final_data(self, city=None, age=None, album_id="profile"):
+    def get_final_data(self, album_id="profile", args=False, **kwargs):
         """на вход подаем уже отфильрованную инфу, пробегаемся по айдишникам, отсеиваем закрытые страницы,
         берем только адекватные фото"""
-
-        peoples = self.create_data(city, age)
+        if not args:
+            peoples = self.create_data()
+        else:
+            peoples = self.create_data(args=True, **kwargs)
         photo_url = self.url + "photos.get"
         final_data = []
         for person in peoples:
@@ -162,7 +163,6 @@ class Vk:
                 final_data.append(person)
             except:
                 pass
-
         return final_data
 
     def search_favorite(self, search_index, data_):

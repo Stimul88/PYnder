@@ -52,14 +52,23 @@ def settings_buttons(user_id_, text):
 def start_button(user_id, index_m):
     my_pynder.add_owner(str(user_id))
     sender(user_id, "Секунду, ищу варианты для тебя.\n")
-    data_m = vk_search.get_final_data()
+    if not search_dict:
+        try:
+            data_m = vk_search.get_final_data()
+        except:
+            sender(user_id, 'Данные в твоем профиле скрыты, пожалуйста заполни условия поиска, нажми на кнопку')
+    else:
+        data_m = vk_search.get_final_data(args=True, **search_dict)
+
+
     if len(data_m) == 0:
         sender(user_id, "Ничего не найдено.\n "
-                        "Попробуй задать другие параметры поиска.\n")
+                            "Попробуй задать другие параметры поиска.\n")
         return None
     sender(user_id, f"Найдено вариантов: {len(data_m)}.")
     user_text, user_photo = vk_search.search_favorite(index_m, data_m)
     all_buttons(user_id, user_text, user_photo)
+
     return data_m
 
 
@@ -239,9 +248,9 @@ def search_configure_button(user_id):
                     )
                     first_keyboards(user_id, "К поиску готов!")
                     return {
-                        "min_age": my_min_age,
-                        "max_age": my_max_age,
-                        "city": my_city,
+                        "age_from": my_min_age,
+                        "age_to": my_max_age,
+                        "city_id": vk_search.get_city_id(my_city),
                     }
 
 
@@ -273,16 +282,20 @@ first_keyboards(
     f"Нажми на кнопку 'Старт' для начала поиска"
     f" или 'Настройки поиска' для задания условий.\n",
 )
-main_index, favorite_index, mode = 0, 0, 0
+
+search_dict, main_index, favorite_index, mode = 0, 0, 0, 0
 favorite_data = {}
 while True:
     my_message = get_user_choice(my_user_id)
     match my_message:
         case "старт🚀":
-            my_data = start_button(my_user_id, main_index)
-            if not my_data:
-                continue
-            mode = 1
+            try:
+                my_data = start_button(my_user_id, main_index)
+                if not my_data:
+                    continue
+                mode = 1
+            except:
+                pass
         case "назад":
             main_index = search_back_button(my_user_id, my_data, main_index)
         case "дальше":
@@ -312,3 +325,4 @@ while True:
             finish_search_button(my_user_id)
         case "настройки поиска":
             search_dict = search_configure_button(my_user_id)
+
