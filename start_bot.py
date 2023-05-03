@@ -5,11 +5,23 @@ from vk_search import Vk
 import configparser
 
 
-def sender(user_id_, text):
+def sender(user_id_: int, text: str):
+    """
+    Функция принимает на вход VK User ID и текст сообщения, которое выводит в чат
+    :param user_id_:
+    :param text:
+    :return:
+    """
     vk.messages.send(user_id=user_id_, message=text, random_id=0)
 
 
-def first_keyboards(user_id_, text):
+def first_keyboards(user_id_: int, text: str):
+    """
+    Функция выводит в чат изначальные кнопки - Старт и Настройки поиска и сообщение
+    :param user_id_:
+    :param text:
+    :return:
+    """
     vk.messages.send(
         user_id=user_id_,
         message=text,
@@ -18,7 +30,14 @@ def first_keyboards(user_id_, text):
     )
 
 
-def favorite_buttons(user_id_, text, images_list):
+def favorite_buttons(user_id_: int, text: str, images_list: list):
+    """
+    Функция выводит в чат кнопки для навигации по Избранному, сообщение, катинки в виде аттача
+    :param user_id_:
+    :param text:
+    :param images_list:
+    :return:
+    """
     vk.messages.send(
         user_id=user_id_,
         message=text,
@@ -28,7 +47,15 @@ def favorite_buttons(user_id_, text, images_list):
     )
 
 
-def all_buttons(user_id_, text, images_list):
+def all_buttons(user_id_: int, text: str, images_list: list):
+    """
+    Функция выводит в чат кнопки навигации по поиску, добавления/удаления в Избранное,
+    сообщение, картинки в виде аттача
+    :param user_id_:
+    :param text:
+    :param images_list:
+    :return:
+    """
     vk.messages.send(
         user_id=user_id_,
         message=text,
@@ -38,7 +65,13 @@ def all_buttons(user_id_, text, images_list):
     )
 
 
-def settings_buttons(user_id_, text):
+def settings_buttons(user_id_: int, text: str):
+    """
+    Функция выводит в чат кнопки меню настроек, сообщение
+    :param user_id_:
+    :param text:
+    :return:
+    """
     vk.messages.send(
         user_id=user_id_,
         message=text,
@@ -49,7 +82,15 @@ def settings_buttons(user_id_, text):
     )
 
 
-def start_button(user_id, index_m):
+def start_button(user_id: int, index_m: int) -> list:
+    """
+    Отработка нажатия на кнопку Старт, принимает на вход индекс текущей записи
+    Возвращает результат поиска в виде списка словарей, либо None если ничего не найдено
+
+    :param user_id:
+    :param index_m:
+    :return:
+    """
     my_pynder.add_owner(str(user_id))
     sender(user_id, "Секунду, ищу варианты для тебя.\n")
     if not search_dict:
@@ -72,7 +113,14 @@ def start_button(user_id, index_m):
     return data_m
 
 
-def search_back_button(user_id, data_m, index_m):
+def search_back_button(user_id: int, data_m: list, index_m: int) -> list:
+    """
+    Отработка нажатия на кнопку "Назад" в меню поиска. Принимает на вход результаты поиска и индекс текущей записи
+    :param user_id:
+    :param data_m:
+    :param index_m:
+    :return:
+    """
     if index_m == 0:
         sender(user_id, "Это самая первая запись, предыдущих нет.\n")
     else:
@@ -82,7 +130,15 @@ def search_back_button(user_id, data_m, index_m):
     return index_m
 
 
-def search_forward_button(user_id, data_m, index_m):
+def search_forward_button(user_id: int, data_m: list, index_m: int) -> int:
+    """
+    Отработка нажатия на кнопку "Дальше" в меню поиска. Принимает на вход результаты поиска и индекс текущей записи
+    Возвращает индекс текущей записи
+    :param user_id:
+    :param data_m:
+    :param index_m:
+    :return:
+    """
     if index_m == len(data_m) - 1:
         # Тима, наверное здесь стоит сделать запрос новых записей если можно вытащить не первые 10,
         # например, а вторые 10, потом третьи и т.д. (Саша)
@@ -97,14 +153,34 @@ def search_forward_button(user_id, data_m, index_m):
     return index_m
 
 
-def add_favorite_button(user_id, data_m, index_m):
+def add_favorite_button(user_id: int, data_m: list, index_m: int):
+    """
+    Отработка нажатия на кнопку "Добавить в избранное" в меню поиска.
+    Принимает на вход результаты поиска и индекс текущей записи
+    :param user_id:
+    :param data_m:
+    :param index_m:
+    :return:
+    """
     if my_pynder.add_favorite(data_m[index_m], str(user_id)):
         sender(user_id, "Добавлено.\n")
     else:
         sender(user_id, "Уже добавлено.\n")
 
 
-def delete_favorite_button(user_id, data_m, index_m, data_f, index_f, mode_):
+def delete_favorite_button(user_id: int, data_m: list, index_m: int, data_f: list, index_f: int, mode_: int):
+    """
+    Отработка нажатия на кнопку "Удалить из избранного" в меню поиска или Избранном.
+    Принимает на вход результаты поиска и индекс текущей записи, список Избранного, индекс текущей записи в Избранном
+    Параметр mode_ определяет в каком режиме была вызвана функция: 1 - режим поиска, 2 - режим Избранного
+    :param user_id:
+    :param data_m:
+    :param index_m:
+    :param data_f:
+    :param index_f:
+    :param mode_:
+    :return:
+    """
     if mode_ == 1:
         delete_result = my_pynder.delete_favorite(
             my_data[index_m]["vk_id"], str(user_id)
@@ -135,7 +211,14 @@ def delete_favorite_button(user_id, data_m, index_m, data_f, index_f, mode_):
         sender(user_id, "Не найдено в Избранном.\n")
 
 
-def view_favorite_button(user_id, data_f):
+def view_favorite_button(user_id: int, data_f: list):
+    """
+    Отработка нажатия на кнопку "Просмотреть избранное" в меню поиска.
+    Принимает на вход содержимое Избранного и индекс текущей записи в Избранном
+    :param user_id:
+    :param data_f:
+    :return:
+    """
     if len(data_f) == 0:
         sender(user_id, "В избранном ничего нет.\n")
     else:
@@ -145,21 +228,37 @@ def view_favorite_button(user_id, data_f):
         favorite_buttons(user_id, f_user_text, f_user_photo)
 
 
-def return_search_button(user_id, data_m, index_m):
+def return_search_button(user_id: int, data_m: list, index_m: int):
+    """
+    Отработка нажатия на кнопку "Вернуться в поиск" в меню Избранного.
+    Принимает на вход результат поиска и индекс текущей записи
+    :param user_id:
+    :param data_m:
+    :param index_m:
+    :return:
+    """
     sender(user_id, "Возвращаюсь в режим поиска. Ты остановился здесь:\n")
     user_text, user_photo = vk_search.search_favorite(index_m, data_m)
     all_buttons(user_id, user_text, user_photo)
 
 
-def favorite_forward_button(user_id, data_f, index_f):
+def favorite_forward_button(user_id: int, data_f: list, index_f: int) -> int:
+    """
+    Отработка нажатия на кнопку "Следующий" в меню Избранного.
+    Принимает на вход содержимое Избранного и индекс текущей записи в Избранном
+    Возвращает индекс текущей записи в Избранном
+    :param user_id:
+    :param data_f:
+    :param index_f:
+    :return:
+    """
     if len(data_f) == 0:
         sender(user_id, "В избранном ничего нет.\n")
     else:
-        # сюда код для прохода по избранным вперед
         if index_f == len(data_f) - 1:
             sender(user_id, "Это последняя запись в Избранном.\n")
         elif index_f > len(data_f) - 1:
-            # Это на случай реализации удаления внутри Избранного
+            # Реализация проверки после удаления внутри Избранного
             index_f = len(data_f) - 1
             sender(user_id, "Это последняя запись в Избранном.\n")
         else:
@@ -169,7 +268,16 @@ def favorite_forward_button(user_id, data_f, index_f):
     return index_f
 
 
-def favorite_back_button(user_id, data_f, index_f):
+def favorite_back_button(user_id: int, data_f: list, index_f: int) -> int:
+    """
+    Отработка нажатия на кнопку "Предыдущий" в меню Избранного.
+    Принимает на вход содержимое Избранного и индекс текущей записи в Избранном
+    Возвращает индекс текущей записи в Избранном
+    :param user_id:
+    :param data_f:
+    :param index_f:
+    :return:
+    """
     if len(data_f) == 0:
         sender(user_id, "В избранном ничего нет.\n")
     else:
@@ -182,7 +290,12 @@ def favorite_back_button(user_id, data_f, index_f):
     return index_f
 
 
-def finish_search_button(user_id):
+def finish_search_button(user_id: int):
+    """
+    Отработка нажатия на кнопку "Закончить поиск"
+    :param user_id:
+    :return:
+    """
     first_keyboards(
         user_id,
         f"Привет, я бот для поиска новых знакомств!\n "
@@ -191,7 +304,13 @@ def finish_search_button(user_id):
     )
 
 
-def search_configure_button(user_id):
+def search_configure_button(user_id: int) -> dict:
+    """
+    Отработка нажатия на кнопку "Настройки поиска". Реализация ввода произвольных параметров поиска.
+    Возвращает словарь с настройками поиска
+    :param user_id:
+    :return:
+    """
     settings_buttons(user_id, "Настройки поиска.\n" "Введите все параметры по очереди.")
     my_min_age = 0
     my_max_age = 0
@@ -254,7 +373,12 @@ def search_configure_button(user_id):
                     }
 
 
-def get_user_choice(user_id):
+def get_user_choice(user_id: int) -> str:
+    """
+    Функция реализует получение ввода пользователя, возвращает текстовое сообщение
+    :param user_id:
+    :return:
+    """
     for user_event in longpoll.listen():
         if user_event.type == VkEventType.MESSAGE_NEW:
             try:
